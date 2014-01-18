@@ -5,21 +5,21 @@
     init: (walk, terrain, x, y) ->
         @walkable = walk 
         @terrain = terrain
-        @x = x
-        @y = y
-        @width = window.tile_width
-        @width = window.tile_height
+        @posx = x
+        @posy = y
 
     load_image: ->
         switch @terrain
             when window.TERRAIN_GRASS
-                @image = window.pinst.loadImage('images/grass.png')
+                @image = pinst.loadImage('images/grass.png')
             when window.TERRAIN_ROCK
-                @image = window.pinst.loadImage('images/rock.png')
+                @image = pinst.loadImage('images/rock.png')
 
 
     draw: () ->
-        window.pinst.image(@image, @x, @y, @width, @height)
+        x = @posx * tile_width
+        y = @posy * tile_height
+        window.pinst.image(@image, x, y, tile_width, tile_height)
 
 
 
@@ -36,6 +36,18 @@
 
     add_tile: (x, y, tile) ->
         @tiles[x][y] = tile
+
+    is_walkable: (x, y) ->
+        if x < 0 or x > @width-1
+            return false
+        if y < 0 or y > @height-1
+            return false
+
+        t = @tiles[x][y]
+        t.walkable
+
+    get_adjacent_tiles: (x, y) ->
+        new Array()
 
     draw: () =>
         for x in [0..@width-1]
@@ -55,9 +67,7 @@
         for x in [0..w-1]
             for y in [0..h-1]
                 t = new window.MapTile
-                posx = x * tile_width
-                posy = y * tile_height
-                t.init true, TERRAIN_GRASS, posx, posy
+                t.init true, TERRAIN_GRASS, x, y
                 map.add_tile x, y, t
 
         rock_no = window.rock_count

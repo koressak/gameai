@@ -11,23 +11,24 @@
     _Class.prototype.init = function(walk, terrain, x, y) {
       this.walkable = walk;
       this.terrain = terrain;
-      this.x = x;
-      this.y = y;
-      this.width = window.tile_width;
-      return this.width = window.tile_height;
+      this.posx = x;
+      return this.posy = y;
     };
 
     _Class.prototype.load_image = function() {
       switch (this.terrain) {
         case window.TERRAIN_GRASS:
-          return this.image = window.pinst.loadImage('images/grass.png');
+          return this.image = pinst.loadImage('images/grass.png');
         case window.TERRAIN_ROCK:
-          return this.image = window.pinst.loadImage('images/rock.png');
+          return this.image = pinst.loadImage('images/rock.png');
       }
     };
 
     _Class.prototype.draw = function() {
-      return window.pinst.image(this.image, this.x, this.y, this.width, this.height);
+      var x, y;
+      x = this.posx * tile_width;
+      y = this.posy * tile_height;
+      return window.pinst.image(this.image, x, y, tile_width, tile_height);
     };
 
     return _Class;
@@ -54,6 +55,22 @@
 
     _Class.prototype.add_tile = function(x, y, tile) {
       return this.tiles[x][y] = tile;
+    };
+
+    _Class.prototype.is_walkable = function(x, y) {
+      var t;
+      if (x < 0 || x > this.width - 1) {
+        return false;
+      }
+      if (y < 0 || y > this.height - 1) {
+        return false;
+      }
+      t = this.tiles[x][y];
+      return t.walkable;
+    };
+
+    _Class.prototype.get_adjacent_tiles = function(x, y) {
+      return new Array();
     };
 
     _Class.prototype.draw = function() {
@@ -88,9 +105,7 @@
       for (x = _i = 0, _ref = w - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; x = 0 <= _ref ? ++_i : --_i) {
         for (y = _j = 0, _ref1 = h - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
           t = new window.MapTile;
-          posx = x * tile_width;
-          posy = y * tile_height;
-          t.init(true, TERRAIN_GRASS, posx, posy);
+          t.init(true, TERRAIN_GRASS, x, y);
           map.add_tile(x, y, t);
         }
       }
