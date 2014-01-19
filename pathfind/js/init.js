@@ -9,7 +9,10 @@
     _this.tile_no_y = 21;
     _this.tile_width = 30;
     _this.tile_height = 30;
-    _this.rock_count = 25;
+    _this.rock_count = 100;
+    _this.max_players = 5;
+    _this.max_targets = 5;
+    _this.scores = $("#gamescores");
     _this.game_objects = new Array;
     el = document.getElementById(elid);
     _this.pinst = new Processing(el, _this.sketchProcess);

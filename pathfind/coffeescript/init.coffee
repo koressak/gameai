@@ -6,7 +6,12 @@
     @tile_no_y = 21
     @tile_width = 30
     @tile_height = 30
-    @rock_count = 25
+    @rock_count = 100
+
+    @max_players = 5
+    @max_targets = 5
+
+    @scores = $("#gamescores")
 
     # @board_width = 150
     # @board_height = 150

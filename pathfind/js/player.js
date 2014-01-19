@@ -8,7 +8,8 @@
       this.posy = 0;
       this.load_image();
       this.current_target = null;
-      return this.current_path = null;
+      this.current_path = null;
+      return this.score = 0;
     };
 
     _Class.prototype.set_position = function(x, y) {
@@ -56,13 +57,33 @@
       return this.current_target = obj;
     };
 
+    _Class.prototype.clear_current_goal = function() {
+      this.current_target = null;
+      return this.current_path = null;
+    };
+
     _Class.prototype.get_next_move = function() {
-      var step;
-      if (this.current_path === null) {
-        this.current_path = this.find_path_to_target(this.current_target);
+      var g, ind, step, t;
+      g = window.g;
+      if (this.current_target !== null) {
+        ind = $.inArray(this.current_target, g.targets);
+        if (ind === -1) {
+          t = g.get_random_target();
+          this.clear_current_goal();
+          this.set_target(t);
+        }
+        if (this.current_path === null) {
+          this.current_path = this.find_path_to_target(this.current_target);
+        }
+        step = this.current_path.splice(0, 1);
+        if (step.length > 0) {
+          return [step[0].posx - this.posx, step[0].posy - this.posy];
+        } else {
+          this.current_path = null;
+          this.current_target = null;
+        }
       }
-      step = this.current_path.splice(0, 1);
-      return [step[0].posx - this.posx, step[0].posy - this.posy];
+      return [0, 0];
     };
 
     _Class.prototype.find_path_to_target = function(obj) {

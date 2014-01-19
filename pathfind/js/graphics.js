@@ -1,14 +1,15 @@
 (function() {
   this.sketchProcess = function(processing) {
-    var f, p;
+    var f, p, running;
     p = processing;
     f = p.loadFont('Arial');
+    running = true;
     processing.setup = function() {
       p.size(window.board_width, window.board_height);
       p.background(200);
       return window.game_objects = new Array();
     };
-    return processing.draw = function() {
+    processing.draw = function() {
       var centerx, centery, map, o, objects, _i, _len, _results;
       if (!g.game_finished) {
         g.game_loop();
@@ -26,6 +27,16 @@
         centery = Math.floor((map.height * tile_height) / 2);
         p.textAlign(p.CENTER);
         return p.text("GAME WON", centerx, centery);
+      }
+    };
+    return processing.keyPressed = function() {
+      if (p.keyCode === 32) {
+        running = !running;
+        if (running) {
+          return p.loop();
+        } else {
+          return p.noLoop();
+        }
       }
     };
   };

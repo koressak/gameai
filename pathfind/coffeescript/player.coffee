@@ -6,6 +6,7 @@
         @load_image()
         @current_target = null
         @current_path = null
+        @score = 0
 
     set_position: (x, y) ->
         @posx = x
@@ -45,13 +46,34 @@
     set_target: (obj) ->
         @current_target = obj
 
+    clear_current_goal: ->
+        @current_target = null
+        @current_path = null
+
     get_next_move: () ->
 
-        if @current_path == null
-            @current_path = @find_path_to_target @current_target
+        g = window.g
 
-        step = @current_path.splice(0,1)
-        [step[0].posx-@posx, step[0].posy-@posy]
+        if @current_target != null
+
+            ind = $.inArray(@current_target, g.targets)
+            if ind == -1
+                t = g.get_random_target()
+                @clear_current_goal()
+                @set_target t
+
+            if @current_path == null
+                @current_path = @find_path_to_target @current_target
+
+            step = @current_path.splice(0,1)
+            if step.length > 0
+                return [step[0].posx-@posx, step[0].posy-@posy]
+            else
+                @current_path = null
+                @current_target = null
+
+
+        [0,0]
 
 
 
