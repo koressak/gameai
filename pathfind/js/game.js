@@ -33,6 +33,7 @@
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
+      this.last_move_time = new Date;
       game_objects.push(this.map);
       this.players = new Array;
       p1 = new Player;
@@ -74,9 +75,23 @@
     };
 
     _Class.prototype.game_loop = function() {
+      var delta, i, newx, newy, now, p, _i, _ref, _ref1, _results;
       if (this.check_got_chest()) {
         this.remove_game_object(this.target);
         return this.game_finished = true;
+      } else {
+        now = new Date;
+        delta = now - this.last_move_time;
+        if (delta > 300) {
+          this.last_move_time = now;
+          _results = [];
+          for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+            p = this.players[i];
+            _ref1 = p.find_next_move(this.target.posx, this.target.posy), newx = _ref1[0], newy = _ref1[1];
+            _results.push(p.move(newx, newy));
+          }
+          return _results;
+        }
       }
     };
 

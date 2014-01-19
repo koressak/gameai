@@ -29,6 +29,8 @@
         @mrender = new window.MapRenderer
         @map = @mrender.render tile_no_x, tile_no_y
 
+        @last_move_time = new Date
+
         game_objects.push(@map)
 
         @players = new Array
@@ -71,6 +73,18 @@
         if @check_got_chest()
             @remove_game_object(@target)
             @game_finished = true
+        else
+            now = new Date
+
+            delta = now - @last_move_time
+
+            if delta > 300
+                @last_move_time = now
+                for i in [0..@players.length-1]
+                    p = @players[i] 
+                    [newx, newy] = p.find_next_move @target.posx, @target.posy
+                    p.move newx, newy
+
 
     check_got_chest: () ->
         got_chest = false

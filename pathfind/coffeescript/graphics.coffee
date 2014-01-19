@@ -22,17 +22,17 @@
             p.text("GAME WON", centerx, centery)
 
 
-    processing.keyPressed = () ->
-        player = g.get_player(0)
-        if p.key.code == p.CODED
-            if p.keyCode == p.UP
-                player.move(0,-1)
-            else if p.keyCode == p.DOWN
-                player.move(0, 1)
-            else if p.keyCode == p.LEFT
-                player.move(-1, 0)
-            else if p.keyCode == p.RIGHT
-                player.move(1, 0)
+    # processing.keyPressed = () ->
+    #     player = g.get_player(0)
+    #     if p.key.code == p.CODED
+    #         if p.keyCode == p.UP
+    #             player.move(0,-1)
+    #         else if p.keyCode == p.DOWN
+    #             player.move(0, 1)
+    #         else if p.keyCode == p.LEFT
+    #             player.move(-1, 0)
+    #         else if p.keyCode == p.RIGHT
+    #             player.move(1, 0)
 
 
 

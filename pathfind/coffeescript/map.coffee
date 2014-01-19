@@ -47,7 +47,23 @@
         t.walkable
 
     get_adjacent_tiles: (x, y) ->
-        new Array()
+        tiles = new Array
+        if x-1 >= 0 and @is_walkable x-1, y
+            tiles.push @tiles[x-1][y]
+        if x+1 <= @width-1 and @is_walkable x+1, y
+            tiles.push @tiles[x+1][y]
+
+        if y-1 >= 0 and @is_walkable x, y-1
+            tiles.push @tiles[x][y-1]
+        if y+1 <= @height-1 and @is_walkable x, y+1
+            tiles.push @tiles[x][y+1]
+
+        return tiles
+
+    get_path_cost: (x1, y1, x2, y2) ->
+        c1 = Math.abs(x1-x2)
+        c2 = Math.abs(y1-y2)
+        return c1+c2
 
     draw: () =>
         for x in [0..@width-1]

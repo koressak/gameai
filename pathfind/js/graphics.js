@@ -8,7 +8,7 @@
       p.background(200);
       return window.game_objects = new Array();
     };
-    processing.draw = function() {
+    return processing.draw = function() {
       var centerx, centery, map, o, objects, _i, _len, _results;
       if (!g.game_finished) {
         g.game_loop();
@@ -26,21 +26,6 @@
         centery = Math.floor((map.height * tile_height) / 2);
         p.textAlign(p.CENTER);
         return p.text("GAME WON", centerx, centery);
-      }
-    };
-    return processing.keyPressed = function() {
-      var player;
-      player = g.get_player(0);
-      if (p.key.code === p.CODED) {
-        if (p.keyCode === p.UP) {
-          return player.move(0, -1);
-        } else if (p.keyCode === p.DOWN) {
-          return player.move(0, 1);
-        } else if (p.keyCode === p.LEFT) {
-          return player.move(-1, 0);
-        } else if (p.keyCode === p.RIGHT) {
-          return player.move(1, 0);
-        }
       }
     };
   };

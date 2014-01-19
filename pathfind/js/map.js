@@ -70,7 +70,28 @@
     };
 
     _Class.prototype.get_adjacent_tiles = function(x, y) {
-      return new Array();
+      var tiles;
+      tiles = new Array;
+      if (x - 1 >= 0 && this.is_walkable(x - 1, y)) {
+        tiles.push(this.tiles[x - 1][y]);
+      }
+      if (x + 1 <= this.width - 1 && this.is_walkable(x + 1, y)) {
+        tiles.push(this.tiles[x + 1][y]);
+      }
+      if (y - 1 >= 0 && this.is_walkable(x, y - 1)) {
+        tiles.push(this.tiles[x][y - 1]);
+      }
+      if (y + 1 <= this.height - 1 && this.is_walkable(x, y + 1)) {
+        tiles.push(this.tiles[x][y + 1]);
+      }
+      return tiles;
+    };
+
+    _Class.prototype.get_path_cost = function(x1, y1, x2, y2) {
+      var c1, c2;
+      c1 = Math.abs(x1 - x2);
+      c2 = Math.abs(y1 - y2);
+      return c1 + c2;
     };
 
     _Class.prototype.draw = function() {
