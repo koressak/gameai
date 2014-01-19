@@ -3,13 +3,13 @@
 
   this.init_game = function(elid) {
     var el;
-    _this.board_width = 630;
-    _this.board_height = 630;
-    _this.tile_no_x = 21;
-    _this.tile_no_y = 21;
+    _this.board_width = 150;
+    _this.board_height = 150;
+    _this.tile_no_x = 5;
+    _this.tile_no_y = 5;
     _this.tile_width = 30;
     _this.tile_height = 30;
-    _this.rock_count = 25;
+    _this.rock_count = 1;
     _this.game_objects = new Array;
     el = document.getElementById(elid);
     _this.pinst = new Processing(el, _this.sketchProcess);

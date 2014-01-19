@@ -60,11 +60,6 @@
 
         return tiles
 
-    get_path_cost: (x1, y1, x2, y2) ->
-        c1 = Math.abs(x1-x2)
-        c2 = Math.abs(y1-y2)
-        return c1+c2
-
     draw: () =>
         for x in [0..@width-1]
             for y in [0..@height-1]

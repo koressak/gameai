@@ -87,13 +87,6 @@
       return tiles;
     };
 
-    _Class.prototype.get_path_cost = function(x1, y1, x2, y2) {
-      var c1, c2;
-      c1 = Math.abs(x1 - x2);
-      c2 = Math.abs(y1 - y2);
-      return c1 + c2;
-    };
-
     _Class.prototype.draw = function() {
       var x, y, _i, _ref, _results;
       _results = [];

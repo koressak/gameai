@@ -75,7 +75,7 @@
     };
 
     _Class.prototype.game_loop = function() {
-      var delta, i, newx, newy, now, p, _i, _ref, _ref1, _results;
+      var delta, i, now, p, path, _i, _ref, _results;
       if (this.check_got_chest()) {
         this.remove_game_object(this.target);
         return this.game_finished = true;
@@ -87,8 +87,9 @@
           _results = [];
           for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
             p = this.players[i];
-            _ref1 = p.find_next_move(this.target.posx, this.target.posy), newx = _ref1[0], newy = _ref1[1];
-            _results.push(p.move(newx, newy));
+            path = p.find_path_to_target(this.target);
+            console.log(path);
+            throw "eeeee";
           }
           return _results;
         }

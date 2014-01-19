@@ -42,21 +42,22 @@
         p = new Path
         path = p.find_path @, obj
 
+        path
 
-        map = g.get_map()
-        tiles = map.get_adjacent_tiles @posx, @posy
+        # map = g.get_map()
+        # tiles = map.get_adjacent_tiles @posx, @posy
 
-        next_cost = 1000000
-        best = -1
+        # next_cost = 1000000
+        # best = -1
 
-        for i in [0..tiles.length-1]
-            t = tiles[i]
-            cost = map.get_path_cost t.posx, t.posy, tx, ty
-            if cost < next_cost
-                best = t
-                next_cost = cost
+        # for i in [0..tiles.length-1]
+        #     t = tiles[i]
+        #     cost = map.get_path_cost t.posx, t.posy, tx, ty
+        #     if cost < next_cost
+        #         best = t
+        #         next_cost = cost
 
-        return [best.posx-@posx, best.posy-@posy]
+        # return [best.posx-@posx, best.posy-@posy]
 
 @NodeRecord = class
     init: ->
@@ -75,6 +76,11 @@
         @end = end
         map = g.get_map()
 
+        console.log "player"
+        console.log start
+        console.log "chest"
+        console.log end
+
         path = null
 
         open = new Array
@@ -83,19 +89,19 @@
         sn = new NodeRecord
         sn.node = @start
         sn.cost_so_far = 0
-        sn.estimate_cost = @estimate_cost @start.posx, @start.posya, @end.posx, @end.posy
+        sn.estimate_cost = @estimate_cost @start.posx, @start.posy, @end.posx, @end.posy
 
         open.push sn
         current = null
 
         while open.length > 0
-            current = _.min open, (el) -> 
-                el.estimated_cost
+            console.log open.concat()
+            current = @get_min_node open
 
-            if current.posx == @end.posx and current.posy == @end.posy
+            if current.node.posx == @end.posx and current.node.posy == @end.posy
                 break
 
-            connections = map.get_adjacent_tiles current.posx, current.posy
+            connections = map.get_adjacent_tiles current.node.posx, current.node.posy
 
             for i in [0..connections.length-1]
                 node = @get_to_node connections[i]
@@ -131,13 +137,14 @@
             closed.push(current)
 
         # Yeah, we got the path
-        if current.node.posx == @end.posx and current.node.posy == @ned.posy
+        if current.node.posx == @end.posx and current.node.posy == @end.posy
             # compile path
+            path = new Array
             while not @is_equals current.node, @start
                 path.push current.node
                 current = current.connection
 
-        return path
+        return path.reverse()
 
     is_equals: (obj1, obj2) ->
         if obj1.posx == obj2.posx and obj1.posy == obj2.posy
@@ -155,7 +162,24 @@
         node.node = connection
         node
 
+    get_min_node: (records) ->
+        best = 100000000000;
+        fin_id = -1
+        for i in [0..records.length-1]
+            r = records[i]
+            if r.estimate_cost < best
+                best = r.estimate_cost
+                fin_id = i
+
+        console.log(best)
+        console.log fin_id
+        records[fin_id]
+
+
     in_node_records: (node, records) ->
+        if records.length == 0
+            return -1
+
         for i in [0..records.length-1]
             r = records[i]
             if node.node.posx == r.node.posx and node.node.posy == r.node.posy

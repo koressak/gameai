@@ -47,22 +47,10 @@
     };
 
     _Class.prototype.find_path_to_target = function(obj) {
-      var best, cost, i, map, next_cost, p, path, t, tiles, _i, _ref;
+      var p, path;
       p = new Path;
       path = p.find_path(this, obj);
-      map = g.get_map();
-      tiles = map.get_adjacent_tiles(this.posx, this.posy);
-      next_cost = 1000000;
-      best = -1;
-      for (i = _i = 0, _ref = tiles.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        t = tiles[i];
-        cost = map.get_path_cost(t.posx, t.posy, tx, ty);
-        if (cost < next_cost) {
-          best = t;
-          next_cost = cost;
-        }
-      }
-      return [best.posx - this.posx, best.posy - this.posy];
+      return path;
     };
 
     return _Class;
@@ -96,23 +84,26 @@
       this.start = start;
       this.end = end;
       map = g.get_map();
+      console.log("player");
+      console.log(start);
+      console.log("chest");
+      console.log(end);
       path = null;
       open = new Array;
       closed = new Array;
       sn = new NodeRecord;
       sn.node = this.start;
       sn.cost_so_far = 0;
-      sn.estimate_cost = this.estimate_cost(this.start.posx, this.start.posya, this.end.posx, this.end.posy);
+      sn.estimate_cost = this.estimate_cost(this.start.posx, this.start.posy, this.end.posx, this.end.posy);
       open.push(sn);
       current = null;
       while (open.length > 0) {
-        current = _.min(open, function(el) {
-          return el.estimated_cost;
-        });
-        if (current.posx === this.end.posx && current.posy === this.end.posy) {
+        console.log(open.concat());
+        current = this.get_min_node(open);
+        if (current.node.posx === this.end.posx && current.node.posy === this.end.posy) {
           break;
         }
-        connections = map.get_adjacent_tiles(current.posx, current.posy);
+        connections = map.get_adjacent_tiles(current.node.posx, current.node.posy);
         for (i = _i = 0, _ref = connections.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           node = this.get_to_node(connections[i]);
           node_cost = current.cost_so_far + 1;
@@ -143,13 +134,14 @@
         open.splice(ind, 1);
         closed.push(current);
       }
-      if (current.node.posx === this.end.posx && current.node.posy === this.ned.posy) {
+      if (current.node.posx === this.end.posx && current.node.posy === this.end.posy) {
+        path = new Array;
         while (!this.is_equals(current.node, this.start)) {
           path.push(current.node);
           current = current.connection;
         }
       }
-      return path;
+      return path.reverse();
     };
 
     _Class.prototype.is_equals = function(obj1, obj2) {
@@ -174,8 +166,27 @@
       return node;
     };
 
+    _Class.prototype.get_min_node = function(records) {
+      var best, fin_id, i, r, _i, _ref;
+      best = 100000000000;
+      fin_id = -1;
+      for (i = _i = 0, _ref = records.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        r = records[i];
+        if (r.estimate_cost < best) {
+          best = r.estimate_cost;
+          fin_id = i;
+        }
+      }
+      console.log(best);
+      console.log(fin_id);
+      return records[fin_id];
+    };
+
     _Class.prototype.in_node_records = function(node, records) {
       var i, r, _i, _ref;
+      if (records.length === 0) {
+        return -1;
+      }
       for (i = _i = 0, _ref = records.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         r = records[i];
         if (node.node.posx === r.node.posx && node.node.posy === r.node.posy) {
