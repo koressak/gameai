@@ -6,7 +6,9 @@
       this.image = null;
       this.posx = 0;
       this.posy = 0;
-      return this.load_image();
+      this.load_image();
+      this.current_target = null;
+      return this.current_path = null;
     };
 
     _Class.prototype.set_position = function(x, y) {
@@ -44,6 +46,23 @@
       x = this.posx * tile_width;
       y = this.posy * tile_height;
       return window.pinst.image(this.image, x, y, tile_width, tile_height);
+    };
+
+    _Class.prototype.has_target = function() {
+      return this.current_target !== null;
+    };
+
+    _Class.prototype.set_target = function(obj) {
+      return this.current_target = obj;
+    };
+
+    _Class.prototype.get_next_move = function() {
+      var step;
+      if (this.current_path === null) {
+        this.current_path = this.find_path_to_target(this.current_target);
+      }
+      step = this.current_path.splice(0, 1);
+      return [step[0].posx - this.posx, step[0].posy - this.posy];
     };
 
     _Class.prototype.find_path_to_target = function(obj) {
@@ -84,10 +103,6 @@
       this.start = start;
       this.end = end;
       map = g.get_map();
-      console.log("player");
-      console.log(start);
-      console.log("chest");
-      console.log(end);
       path = null;
       open = new Array;
       closed = new Array;
@@ -98,7 +113,6 @@
       open.push(sn);
       current = null;
       while (open.length > 0) {
-        console.log(open.concat());
         current = this.get_min_node(open);
         if (current.node.posx === this.end.posx && current.node.posy === this.end.posy) {
           break;
@@ -177,8 +191,6 @@
           fin_id = i;
         }
       }
-      console.log(best);
-      console.log(fin_id);
       return records[fin_id];
     };
 

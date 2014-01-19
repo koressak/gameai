@@ -4,6 +4,8 @@
         @posx = 0
         @posy = 0
         @load_image()
+        @current_target = null
+        @current_path = null
 
     set_position: (x, y) ->
         @posx = x
@@ -36,6 +38,22 @@
         x = @posx * tile_width
         y = @posy * tile_height
         window.pinst.image(@image, x, y, tile_width, tile_height)
+
+    has_target: ->
+        @current_target != null
+
+    set_target: (obj) ->
+        @current_target = obj
+
+    get_next_move: () ->
+
+        if @current_path == null
+            @current_path = @find_path_to_target @current_target
+
+        step = @current_path.splice(0,1)
+        [step[0].posx-@posx, step[0].posy-@posy]
+
+
 
     find_path_to_target: (obj) ->
         # A* algorithm implementation
@@ -76,10 +94,10 @@
         @end = end
         map = g.get_map()
 
-        console.log "player"
-        console.log start
-        console.log "chest"
-        console.log end
+        # console.log "player"
+        # console.log start
+        # console.log "chest"
+        # console.log end
 
         path = null
 
@@ -95,7 +113,7 @@
         current = null
 
         while open.length > 0
-            console.log open.concat()
+            # console.log open.concat()
             current = @get_min_node open
 
             if current.node.posx == @end.posx and current.node.posy == @end.posy
@@ -171,8 +189,8 @@
                 best = r.estimate_cost
                 fin_id = i
 
-        console.log(best)
-        console.log fin_id
+        # console.log(best)
+        # console.log fin_id
         records[fin_id]
 
 

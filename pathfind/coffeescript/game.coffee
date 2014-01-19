@@ -82,11 +82,15 @@
                 @last_move_time = now
                 for i in [0..@players.length-1]
                     p = @players[i] 
-                    path = p.find_path_to_target @target
-                    console.log path
-                    throw "eeeee"
-                    # [newx, newy] = p.find_next_move @target.posx, @target.posy
-                    # p.move newx, newy
+
+                    unless p.has_target()
+                        p.set_target @target
+
+                    [newx, newy] = p.get_next_move()
+                    p.move newx, newy
+                    # path = p.find_path_to_target @target
+                    # console.log path
+                    # throw "eeeee"
 
 
     check_got_chest: () ->
