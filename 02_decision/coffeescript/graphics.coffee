@@ -11,9 +11,8 @@
     processing.draw = () ->
         if not g.game_finished
             g.game_loop()
-            objects = window.game_objects
-            for o in objects
-                o.draw()
+            map = g.get_map()
+            map.draw()
         else
             p.textFont(f, 40)
             map = g.get_map()

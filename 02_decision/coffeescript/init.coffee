@@ -11,7 +11,7 @@
     @max_players = 5
     @max_targets = 5
 
-    @scores = $("#gamescores")
+    @stats = $("#gamestats")
 
     # @board_width = 150
     # @board_height = 150
@@ -22,7 +22,6 @@
     # @rock_count = 1
 
     # Init visualisation
-    @game_objects = new Array
     el = document.getElementById elid
     @pinst = new Processing(el, @sketchProcess)
 

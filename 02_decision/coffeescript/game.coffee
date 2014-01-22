@@ -5,6 +5,18 @@
     constructor: ->
         console.log "Initialization of Game"
 
+    init_game: ->
+        @game_finished = false
+        @mrender = new window.MapRenderer
+        @map = @mrender.render tile_no_x, tile_no_y
+
+        @last_move_time = new Date
+        @players = new Array
+
+        @spawn_new_player()
+        @spawn_new_player()
+        @update_ui()
+
     get_player: (x) ->
         if x < @players.length
             @players[x]
@@ -16,38 +28,16 @@
 
     is_tile_free: (x, y) ->
         good = true
+        if @players.length == 0
+            return good
         for i in [0..@players.length-1]
             p = @players[i] 
             if p.posx == x and p.posy == y
                 good = false
-
         good
 
 
-    init_game: ->
-        @game_finished = false
-        @mrender = new window.MapRenderer
-        @map = @mrender.render tile_no_x, tile_no_y
-
-        @last_move_time = new Date
-
-        game_objects.push(@map)
-
-        @players = new Array
-        @targets = new Array
-
-        @spawn_new_player()
-        @spawn_new_target()
-        @update_ui()
-
-    remove_game_object: (obj) ->
-        ind = $.inArray(obj, game_objects)
-        if ind != -1
-            game_objects.splice(ind, 1)
-
-
     game_loop: () ->
-        @check_got_chest()
         now = new Date
 
         delta = now - @last_move_time
@@ -56,25 +46,20 @@
             @last_move_time = now
             for i in [0..@players.length-1]
                 p = @players[i] 
+                p.do_action()
 
-                unless p.has_target()
-                    p.set_target @get_random_target()
-
-                [newx, newy] = p.get_next_move()
-                p.move newx, newy
-
-            ind = Math.floor(Math.random()*100)
-            if ind <= 20
-                @spawn_new_target()
-
+            # ind = Math.floor(Math.random()*100)
+            # if ind <= 20
+            #     @spawn_new_target()
+        @update_ui()
 
 
     get_random_target: () ->
-        if @targets.length == 0
+        if @players.length == 0
             return null
 
-        ind = Math.floor(Math.random()*@targets.length)
-        @targets[ind]
+        ind = Math.floor(Math.random()*@players.length)
+        @players[ind]
 
     spawn_new_player: () ->
         # Instantiate player object and place him randomly on screen
@@ -89,50 +74,38 @@
             posx = get_random_int 0, @map.width-1
             posy = get_random_int 0, @map.height-1
             if @map.is_walkable posx, posy
-                good = true
-                p.set_position posx, posy
+                if @is_tile_free posx, posy
+                    good = true
+                    p.set_position posx, posy
 
         @players.push p
-        game_objects.push p
+        @map.add_game_object p
 
-    spawn_new_target: () ->
+    # spawn_new_target: () ->
 
-        if @targets.length >= max_targets
-            return 
+    #     if @targets.length >= max_targets
+    #         return 
             
-        t = new Target
-        t.init()
-        good = false
-        while not good
-            posx = get_random_int 0, @map.width-1
-            posy = get_random_int 0, @map.height-1
-            if @is_tile_free posx, posy
-                if @map.is_walkable posx, posy
-                    good = true
-                    t.set_position posx, posy
+    #     t = new Target
+    #     t.init()
+    #     good = false
+    #     while not good
+    #         posx = get_random_int 0, @map.width-1
+    #         posy = get_random_int 0, @map.height-1
+    #         if @is_tile_free posx, posy
+    #             if @map.is_walkable posx, posy
+    #                 good = true
+    #                 t.set_position posx, posy
 
-        @targets.push t
-        game_objects.push t
+    #     @targets.push t
+    #     @map.add_game_object t
 
-
-    check_got_chest: () ->
-        for i in [0..@players.length-1]
-            p = @players[i] 
-            for u in [0..@targets.length-1]
-                t = @targets[u]
-                if p.posx == t.posx and p.posy == t.posy
-                    p.score += 1
-                    p.clear_current_goal()
-                    @remove_game_object(t)
-                    @targets.splice(u, 1)
-                    @spawn_new_target()
-                    @spawn_new_player()
-                    @update_ui()
 
     update_ui: () ->
-        scores.html("")
+        stats.html("")
         for i in [0..@players.length-1]
             p = @players[i] 
-            scores.append("<p><strong>Player "+i+"</strong><br>")
-            scores.append("Score: "+p.score+"</p>")
+            stats.append("<p><strong>Player "+i+"</strong><br>")
+            stats.append("Score: "+p.score+"</p>")
+            stats.append("Health: "+p.health+"</p><br>")
 

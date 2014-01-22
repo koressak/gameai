@@ -46,6 +46,7 @@
       this.width = w;
       this.height = h;
       this.tiles = new Array(w);
+      this.game_objects = new Array;
       _results = [];
       for (i = _i = 0, _ref = w - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         _results.push(this.tiles[i] = new Array(h));
@@ -55,6 +56,20 @@
 
     _Class.prototype.add_tile = function(x, y, tile) {
       return this.tiles[x][y] = tile;
+    };
+
+    _Class.prototype.add_game_object = function(obj) {
+      if ($.inArray(obj, this.game_objects === -1)) {
+        return this.game_objects.push(obj);
+      }
+    };
+
+    _Class.prototype.remove_game_object = function(obj) {
+      var ind;
+      ind = $.inArray(obj, this.game_objects);
+      if (ind !== -1) {
+        return this.game_objects.splice(ind, 1);
+      }
     };
 
     _Class.prototype.is_walkable = function(x, y) {
@@ -88,17 +103,17 @@
     };
 
     _Class.prototype.draw = function() {
-      var x, y, _i, _ref, _results;
-      _results = [];
+      var obj, x, y, _i, _j, _k, _len, _ref, _ref1, _ref2, _results;
       for (x = _i = 0, _ref = this.width - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; x = 0 <= _ref ? ++_i : --_i) {
-        _results.push((function() {
-          var _j, _ref1, _results1;
-          _results1 = [];
-          for (y = _j = 0, _ref1 = this.height - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
-            _results1.push(this.tiles[x][y].draw());
-          }
-          return _results1;
-        }).call(this));
+        for (y = _j = 0, _ref1 = this.height - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+          this.tiles[x][y].draw();
+        }
+      }
+      _ref2 = this.game_objects;
+      _results = [];
+      for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
+        obj = _ref2[_k];
+        _results.push(obj.draw());
       }
       return _results;
     };

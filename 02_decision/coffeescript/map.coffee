@@ -31,11 +31,22 @@
         @width = w
         @height = h
         @tiles = new Array(w)
+        @game_objects = new Array
         for i in [0..w-1]
             @tiles[i] = new Array(h)
 
     add_tile: (x, y, tile) ->
         @tiles[x][y] = tile
+
+    add_game_object: (obj) ->
+        if $.inArray obj, @game_objects == -1
+            @game_objects.push obj
+
+    remove_game_object: (obj) ->
+        ind =  $.inArray obj, @game_objects
+
+        if ind != -1
+            @game_objects.splice ind, 1
 
     is_walkable: (x, y) ->
         if x < 0 or x > @width-1
@@ -64,6 +75,9 @@
         for x in [0..@width-1]
             for y in [0..@height-1]
                 @tiles[x][y].draw()
+
+        for obj in @game_objects
+            obj.draw()
 
 
 

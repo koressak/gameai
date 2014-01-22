@@ -10,16 +10,11 @@
       return window.game_objects = new Array();
     };
     processing.draw = function() {
-      var centerx, centery, map, o, objects, _i, _len, _results;
+      var centerx, centery, map;
       if (!g.game_finished) {
         g.game_loop();
-        objects = window.game_objects;
-        _results = [];
-        for (_i = 0, _len = objects.length; _i < _len; _i++) {
-          o = objects[_i];
-          _results.push(o.draw());
-        }
-        return _results;
+        map = g.get_map();
+        return map.draw();
       } else {
         p.textFont(f, 40);
         map = g.get_map();
