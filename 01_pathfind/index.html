@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>AI - Pathfinding</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <script type="text/javascript" src="lib/jquery-2.0.3.min.js"></script>
+        <script type="text/javascript" src="lib/underscore-min.js"></script>
+        <script type="text/javascript" src="lib/processing-1.4.1.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h1>Pathfinding</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <canvas id="gamecanvas" width="640" height="480"></canvas>
+                </div>
+                <div class="col-md-4">
+                    <h5>Game scores</h5>
+                    <div id="gamescores">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript" src="js/map.js"></script>
+        <script type="text/javascript" src="js/player.js"></script>
+        <script type="text/javascript" src="js/game.js"></script>
+        <script type="text/javascript" src="js/graphics.js"></script>
+        <script type="text/javascript" src="js/init.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                window.init_game('gamecanvas');
+            })
+        </script>
+    </body>
+</html>
