@@ -12,7 +12,8 @@
       this.walkable = walk;
       this.terrain = terrain;
       this.posx = x;
-      return this.posy = y;
+      this.posy = y;
+      return this.object = null;
     };
 
     _Class.prototype.load_image = function() {
@@ -22,6 +23,25 @@
         case window.TERRAIN_ROCK:
           return this.image = pinst.loadImage('images/rock.png');
       }
+    };
+
+    _Class.prototype.set_object = function(obj) {
+      return this.object = obj;
+    };
+
+    _Class.prototype.get_object = function() {
+      return this.object;
+    };
+
+    _Class.prototype.remove_object = function() {
+      var o;
+      o = this.object;
+      this.object = null;
+      return o;
+    };
+
+    _Class.prototype.is_free = function() {
+      return this.object === null;
     };
 
     _Class.prototype.draw = function() {
@@ -60,7 +80,8 @@
 
     _Class.prototype.add_game_object = function(obj) {
       if ($.inArray(obj, this.game_objects === -1)) {
-        return this.game_objects.push(obj);
+        this.game_objects.push(obj);
+        return this.tiles[obj.posx][obj.posy].set_object(obj);
       }
     };
 
@@ -72,7 +93,7 @@
       }
     };
 
-    _Class.prototype.is_walkable = function(x, y) {
+    _Class.prototype.is_tile_walkable = function(x, y) {
       var t;
       if (x < 0 || x > this.width - 1) {
         return false;
@@ -82,6 +103,10 @@
       }
       t = this.tiles[x][y];
       return t.walkable;
+    };
+
+    _Class.prototype.is_tile_free = function(x, y) {
+      return this.tiles[x][y].is_free();
     };
 
     _Class.prototype.get_adjacent_tiles = function(x, y) {

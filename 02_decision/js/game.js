@@ -11,7 +11,6 @@
       this.last_move_time = new Date;
       this.players = new Array;
       this.spawn_new_player();
-      this.spawn_new_player();
       return this.update_ui();
     };
 
@@ -27,23 +26,8 @@
       return this.map;
     };
 
-    _Class.prototype.is_tile_free = function(x, y) {
-      var good, i, p, _i, _ref;
-      good = true;
-      if (this.players.length === 0) {
-        return good;
-      }
-      for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = this.players[i];
-        if (p.posx === x && p.posy === y) {
-          good = false;
-        }
-      }
-      return good;
-    };
-
     _Class.prototype.game_loop = function() {
-      var delta, i, now, p, _i, _ref;
+      var delta, i, ind, now, p, _i, _ref;
       now = new Date;
       delta = now - this.last_move_time;
       if (delta > 300) {
@@ -51,6 +35,10 @@
         for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           p = this.players[i];
           p.do_action();
+        }
+        ind = Math.floor(Math.random() * 100);
+        if (ind <= 5) {
+          this.spawn_powerup();
         }
       }
       return this.update_ui();
@@ -77,7 +65,7 @@
         posx = get_random_int(0, this.map.width - 1);
         posy = get_random_int(0, this.map.height - 1);
         if (this.map.is_walkable(posx, posy)) {
-          if (this.is_tile_free(posx, posy)) {
+          if (this.map.is_tile_free(posx, posy)) {
             good = true;
             p.set_position(posx, posy);
           }
@@ -87,15 +75,42 @@
       return this.map.add_game_object(p);
     };
 
+    _Class.prototype.spawn_powerup = function() {
+      var good, p, posx, posy, type;
+      type = get_random_int(0, 1);
+      if (type === 0) {
+        p = new HealthPowerUp;
+      } else {
+        p = new SpeedPowerUp;
+      }
+      p.init();
+      good = false;
+      while (!good) {
+        posx = get_random_int(0, this.map.width - 1);
+        posy = get_random_int(0, this.map.height - 1);
+        if (this.is_tile_free(posx, posy)) {
+          if (this.map.is_walkable(posx, posy)) {
+            if (this.map.is_tile_free(posx, posy)) {
+              good = true;
+              p.set_position(posx, posy);
+            }
+          }
+        }
+      }
+      return p.add_to_game();
+    };
+
     _Class.prototype.update_ui = function() {
       var i, p, _i, _ref, _results;
       stats.html("");
       _results = [];
       for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
         p = this.players[i];
-        stats.append("<p><strong>Player " + i + "</strong><br>");
-        stats.append("Score: " + p.score + "</p>");
-        _results.push(stats.append("Health: " + p.health + "</p><br>"));
+        stats.append("<p><strong>Player " + (i + 1) + "</strong><br>");
+        stats.append("Score: " + p.score + "<br>");
+        stats.append("Health: " + p.health + "<br>");
+        stats.append("Speed: " + p.speed + "<br>");
+        _results.push(stats.append("</p><br>"));
       }
       return _results;
     };

@@ -7,6 +7,7 @@
         @terrain = terrain
         @posx = x
         @posy = y
+        @object = null
 
     load_image: ->
         switch @terrain
@@ -15,6 +16,19 @@
             when window.TERRAIN_ROCK
                 @image = pinst.loadImage('images/rock.png')
 
+    set_object: (obj) ->
+        @object = obj
+
+    get_object: ->
+        @object
+
+    remove_object: ->
+        o = @object
+        @object = null
+        o
+
+    is_free: ->
+        @object == null
 
     draw: () ->
         x = @posx * tile_width
@@ -41,6 +55,7 @@
     add_game_object: (obj) ->
         if $.inArray obj, @game_objects == -1
             @game_objects.push obj
+            @tiles[obj.posx][obj.posy].set_object obj
 
     remove_game_object: (obj) ->
         ind =  $.inArray obj, @game_objects
@@ -48,7 +63,7 @@
         if ind != -1
             @game_objects.splice ind, 1
 
-    is_walkable: (x, y) ->
+    is_tile_walkable: (x, y) ->
         if x < 0 or x > @width-1
             return false
         if y < 0 or y > @height-1
@@ -56,6 +71,9 @@
 
         t = @tiles[x][y]
         t.walkable
+
+    is_tile_free: (x, y) ->
+        @tiles[x][y].is_free()
 
     get_adjacent_tiles: (x, y) ->
         tiles = new Array
