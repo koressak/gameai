@@ -5,6 +5,9 @@
     }
 
     _Class.prototype.init_game = function() {
+      var build;
+      build = new DecisionBuilder;
+      console.log(build.generate_tree());
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
@@ -42,15 +45,6 @@
         }
       }
       return this.update_ui();
-    };
-
-    _Class.prototype.get_random_target = function() {
-      var ind;
-      if (this.players.length === 0) {
-        return null;
-      }
-      ind = Math.floor(Math.random() * this.players.length);
-      return this.players[ind];
     };
 
     _Class.prototype.spawn_new_player = function() {

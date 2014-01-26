@@ -62,23 +62,3 @@
             @current_target = g.get_random_target()
             
 
-
-# @Target = class
-#     init: ->
-#         @image = null
-#         @posx = 0
-#         @posy = 0
-#         @load_image()
-
-#     load_image: ->
-#         @image = pinst.loadImage('images/chest.png')
-
-#     set_position: (x, y) ->
-#         @posx = x
-#         @posy = y
-
-#     draw: () ->
-#         x = @posx * tile_width
-#         y = @posy * tile_height
-#         window.pinst.image(@image, x, y, tile_width, tile_height)
-

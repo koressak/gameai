@@ -6,6 +6,9 @@
         console.log "Initialization of Game"
 
     init_game: ->
+        build = new DecisionBuilder
+        console.log build.generate_tree()
+
         @game_finished = false
         @mrender = new window.MapRenderer
         @map = @mrender.render tile_no_x, tile_no_y
@@ -16,6 +19,7 @@
         @spawn_new_player()
         # @spawn_new_player()
         @update_ui()
+
 
 
     get_player: (x) ->
@@ -43,13 +47,6 @@
                 @spawn_powerup()
         @update_ui()
 
-
-    get_random_target: () ->
-        if @players.length == 0
-            return null
-
-        ind = Math.floor(Math.random()*@players.length)
-        @players[ind]
 
     spawn_new_player: () ->
         # Instantiate player object and place him randomly on screen
