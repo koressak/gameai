@@ -35,21 +35,29 @@
 
 <p>The project evolution will go from basic pathfinding algorithms (as A*) to behavior decisions and, if God helps, to the neural networks or genetic algorithm to start the ai learning.</p>
 
-<h3>
-<a name="goal" class="anchor" href="#goal"><span class="octicon octicon-link"></span></a>Goal</h3>
 
-<p>Goal to all parts of the project is a Player (AI) and a target. In pathfinding it's a player to find treasure chest.
-In others it will be PvP battle between players.</p>
-
-<h3>
-<a name="01-pathfinding" class="anchor" href="#01-pathfinding"><span class="octicon octicon-link"></span></a>01 pathfinding</h3>
+<h2>
+<a name="01-pathfinding" class="anchor" href="#01-pathfinding"><span class="octicon octicon-link"></span></a>01 pathfinding</h2>
 
 <p>Basic Astar pathfinding algorithm used to get player to the target - treasure chest.</p>
 
 <h3>
-<a name="02-decision" class="anchor" href="#02-decision"><span class="octicon octicon-link"></span></a>02 decision</h3>
+<a name="goal" class="anchor" href="#01-goal"><span class="octicon octicon-link"></span></a>Goal</h3>
+<p>
+  Goal to this part is to implement A* algorithm. The player picks up random target (treasure chest) and finds it's way to it. When the chest is picked up by him/other player, he must seek other target to to pursue.
+</p>
+<p>There are up to 5 players spawned when there is a chest consumed. Chests are spawned with 20% probability each game cycle.
+</p>
+
+
+<h2>
+<a name="02-decision" class="anchor" href="#02-decision"><span class="octicon octicon-link"></span></a>02 decision</h2>
 
 <p>Basic decision tree - building a tree of decisions and actions for player to interact in an unknown world.</p>
+
+<h3>
+<a name="goal" class="anchor" href="#02-goal"><span class="octicon octicon-link"></span></a>Goal</h3>
+<p>The settings of this part is that player has limited knowledge of the surroundings and the whole world. It has limited speed, sight and doesn't know anything. He has to explore the world, pick up power ups which will speed him up, heal him or give him a better gun.</p>
 
 <h3>
 <a name="links" class="anchor" href="#links"><span class="octicon octicon-link"></span></a>Links</h3>
