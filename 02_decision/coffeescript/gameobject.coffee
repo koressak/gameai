@@ -46,6 +46,7 @@
         else if y < 0
             nposy -=1
 
-        if map.is_walkable nposx, nposy
+        if map.is_tile_walkable nposx, nposy
+            map.move_game_object @posx, @posy, nposx, nposy
             @posx = nposx
             @posy = nposy

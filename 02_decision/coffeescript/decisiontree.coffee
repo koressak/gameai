@@ -1,24 +1,25 @@
+@COND_ALWAYS_TRUE = 'aw'
+
 @DecisionTreeNode = class
+    # Needs to have a conditions (array of function callbacks to player functions)
+    # Needs to have an action - callback to player function of an action that needs to be taken
     init: ->
         @action = null 
-        @conditions = new Array
+        @condition = null
         @left = null
         @right = null
 
     set_action: (action) ->
         @action = action
 
-    add_condition: (cond) ->
-        @conditions.push cond
+    set_condition: (cond) ->
+        @condition = cond
 
     compare_conditions: (player) ->
-        result = False
-        # Compare all conditions on player 
-        for cond in @conditions
-            result &= cond player
-
-        # if player is good to go this way, return true
-        return result
+        # Run the condition function and see if it's true/false
+        if @condition == COND_ALWAYS_TRUE
+            return true
+        player[@condition]()
 
     get_next_node: (player) ->
         # Decide where to go next or null
@@ -29,7 +30,8 @@
 
         if @left.compare_conditions player
             return @left
-        else if @right.compare_conditions player
+
+        if @right.compare_conditions player
             return @right
 
         null
@@ -50,17 +52,43 @@
         current = @root
 
         while true
+            # console.log "Tree, current node"
+            # console.log current
+            if current.action != null
+                return current
+
             nnode = current.get_next_node player
             if nnode == null
-                return current
+                return nnode
             else
                 current = nnode
 
 
 @DecisionBuilder = class
-    generate_tree: () ->
+
+    gen_new_node: (action, condition) ->
         node = new DecisionTreeNode
+        node.init()
+        node.action = action
+        node.condition = condition
+        node
+
+    gen_always_true: (action) ->
+        @gen_new_node action, COND_ALWAYS_TRUE
+
+    generate_tree: () ->
+        # Create the tree to cover all the actions
+        root = @gen_new_node null, null
+
+        see = @gen_new_node null, 'can_see_object'
+        explore = @gen_always_true 'explore'
+
+        root.left = see
+        root.right = explore
+
+
+        # Finally create a tree object
         tree = new DecisionTree
-        tree.set_root node
+        tree.set_root root
         tree
 

@@ -1,10 +1,12 @@
 (function() {
+  this.COND_ALWAYS_TRUE = 'aw';
+
   this.DecisionTreeNode = (function() {
     function _Class() {}
 
     _Class.prototype.init = function() {
       this.action = null;
-      this.conditions = new Array;
+      this.condition = null;
       this.left = null;
       return this.right = null;
     };
@@ -13,19 +15,15 @@
       return this.action = action;
     };
 
-    _Class.prototype.add_condition = function(cond) {
-      return this.conditions.push(cond);
+    _Class.prototype.set_condition = function(cond) {
+      return this.condition = cond;
     };
 
     _Class.prototype.compare_conditions = function(player) {
-      var cond, result, _i, _len, _ref;
-      result = False;
-      _ref = this.conditions;
-      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-        cond = _ref[_i];
-        result &= cond(player);
+      if (this.condition === COND_ALWAYS_TRUE) {
+        return true;
       }
-      return result;
+      return player[this.condition]();
     };
 
     _Class.prototype.get_next_node = function(player) {
@@ -34,7 +32,8 @@
       }
       if (this.left.compare_conditions(player)) {
         return this.left;
-      } else if (this.right.compare_conditions(player)) {
+      }
+      if (this.right.compare_conditions(player)) {
         return this.right;
       }
       return null;
@@ -62,9 +61,12 @@
       }
       current = this.root;
       while (true) {
+        if (current.action !== null) {
+          return current;
+        }
         nnode = current.get_next_node(player);
         if (nnode === null) {
-          return current;
+          return nnode;
         } else {
           current = nnode;
         }
@@ -78,11 +80,28 @@
   this.DecisionBuilder = (function() {
     function _Class() {}
 
-    _Class.prototype.generate_tree = function() {
-      var node, tree;
+    _Class.prototype.gen_new_node = function(action, condition) {
+      var node;
       node = new DecisionTreeNode;
+      node.init();
+      node.action = action;
+      node.condition = condition;
+      return node;
+    };
+
+    _Class.prototype.gen_always_true = function(action) {
+      return this.gen_new_node(action, COND_ALWAYS_TRUE);
+    };
+
+    _Class.prototype.generate_tree = function() {
+      var explore, root, see, tree;
+      root = this.gen_new_node(null, null);
+      see = this.gen_new_node(null, 'can_see_object');
+      explore = this.gen_always_true('explore');
+      root.left = see;
+      root.right = explore;
       tree = new DecisionTree;
-      tree.set_root(node);
+      tree.set_root(root);
       return tree;
     };
 

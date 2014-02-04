@@ -6,9 +6,6 @@
         console.log "Initialization of Game"
 
     init_game: ->
-        build = new DecisionBuilder
-        console.log build.generate_tree()
-
         @game_finished = false
         @mrender = new window.MapRenderer
         @map = @mrender.render tile_no_x, tile_no_y
@@ -19,7 +16,6 @@
         @spawn_new_player()
         # @spawn_new_player()
         @update_ui()
-
 
 
     get_player: (x) ->
@@ -60,10 +56,11 @@
         while not good
             posx = get_random_int 0, @map.width-1
             posy = get_random_int 0, @map.height-1
-            if @map.is_walkable posx, posy
+            if @map.is_tile_walkable posx, posy
                 if @map.is_tile_free posx, posy
                     good = true
                     p.set_position posx, posy
+                    @map.set_tile_explored posx, posy
 
         @players.push p
         @map.add_game_object p
@@ -81,9 +78,9 @@
         while not good
             posx = get_random_int 0, @map.width-1
             posy = get_random_int 0, @map.height-1
-            if @is_tile_free posx, posy
-                if @map.is_walkable posx, posy
-                    if @map.is_tile_free posx, posy
+            if @map.is_tile_free posx, posy
+                if @map.is_tile_walkable posx, posy
+                    if @map.get_tile_object(posx, posy) == null
                         good = true
                         p.set_position posx, posy
 

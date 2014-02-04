@@ -5,9 +5,6 @@
     }
 
     _Class.prototype.init_game = function() {
-      var build;
-      build = new DecisionBuilder;
-      console.log(build.generate_tree());
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
@@ -58,10 +55,11 @@
       while (!good) {
         posx = get_random_int(0, this.map.width - 1);
         posy = get_random_int(0, this.map.height - 1);
-        if (this.map.is_walkable(posx, posy)) {
+        if (this.map.is_tile_walkable(posx, posy)) {
           if (this.map.is_tile_free(posx, posy)) {
             good = true;
             p.set_position(posx, posy);
+            this.map.set_tile_explored(posx, posy);
           }
         }
       }
@@ -82,9 +80,9 @@
       while (!good) {
         posx = get_random_int(0, this.map.width - 1);
         posy = get_random_int(0, this.map.height - 1);
-        if (this.is_tile_free(posx, posy)) {
-          if (this.map.is_walkable(posx, posy)) {
-            if (this.map.is_tile_free(posx, posy)) {
+        if (this.map.is_tile_free(posx, posy)) {
+          if (this.map.is_tile_walkable(posx, posy)) {
+            if (this.map.get_tile_object(posx, posy) === null) {
               good = true;
               p.set_position(posx, posy);
             }
