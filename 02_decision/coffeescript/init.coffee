@@ -8,6 +8,8 @@
     @tile_height = 30
     @rock_count = 100
 
+    @powerup_spawn_percent = 15
+
     @max_players = 5
     @max_targets = 5
 

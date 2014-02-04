@@ -39,7 +39,7 @@
                 p.do_action()
 
             ind = Math.floor(Math.random()*100)
-            if ind <= 5
+            if ind <= powerup_spawn_percent
                 @spawn_powerup()
         @update_ui()
 
