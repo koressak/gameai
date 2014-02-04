@@ -24,6 +24,22 @@
                         <li>
                         <strong>Speed bonus</strong> - +1 action per frame step, 3 frame steps timeout.</li>
                     </ul>
+
+                    <p>
+                        <strong>Decision tree status</strong>: For each step, the decision tree is traversed to find first node with non empty action and this action is the final decision for the moment.
+                    </p>
+                    <p>
+                        Currently implemented actions:
+                    </p>
+                    <ul>
+                        <li>If can see and object
+                            <ul>
+                                <li>If is object consumable - consume</li>
+                                <li>Else explore the map further</li>
+                            </ul>
+                        </li>
+                        <li>Otherwise explore</li>
+                    </ul>
                 </div>
             </div>
             <div class="row">
