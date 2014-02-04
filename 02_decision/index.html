@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>AI - Pathfinding</title>
+        <title>AI - Decision making</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <!-- Bootstrap -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
@@ -13,8 +13,17 @@
     <body>
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <h1>Pathfinding</h1>
+                <div class="col-md-7">
+                    <h1>Basic decision making</h1>
+                    <p>Basic layout: the world is unknown, better to say unexplored.</p>
+                    <p>While the player explores the world (map is uncovering) he finds power ups.<br>
+                    If such power up is encountered, player chooses to pick it up and consume it. 
+                    Exploration is done randomly - player keeps track of tiles he has not been to and if he has no other task to do, he picks up one tile and finds his way to it.</p>
+                    <ul>
+                        <li><strong>Health bonus</strong> - instant +20 of players health.</li>
+                        <li>
+                        <strong>Speed bonus</strong> - +1 action per frame step, 3 frame steps timeout.</li>
+                    </ul>
                 </div>
             </div>
             <div class="row">

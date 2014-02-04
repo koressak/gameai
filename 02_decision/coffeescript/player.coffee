@@ -83,7 +83,6 @@
 
         if @active_bonuses.length > 0
             for i in [0..@active_bonuses.length-1]
-                console.log i
                 o = @active_bonuses[i]
                 o.timeout -= 1
                 if o.timeout == 0
@@ -123,8 +122,8 @@
             if o != null
                 @seeable_objects.push o
 
-        console.log "Seeable objects", @seeable_objects
-        console.log "Result", @seeable_objects.length
+        # console.log "Seeable objects", @seeable_objects
+        # console.log "Result", @seeable_objects.length
         @seeable_objects.length != 0
 
     is_object_consumable: ->
@@ -153,8 +152,8 @@
         # Pick random unexplored tile if not already done
         if @current_path == null
             [x, y] = @pick_random_unexplored_tile()
-            console.log "New target"
-            console.log x, y
+            # console.log "New target"
+            # console.log x, y
             tile = @map.tiles[x][y]
             @current_path = @find_path_to_target tile
             # console.log "New path", @current_path
@@ -186,21 +185,18 @@
         # Process expiry of bonuses
         @process_bonuses()
 
-        # if @is_acting()
-        #     @[@current_action]()
-        # else
-        node = @decision.make_decision @
-        console.log 'Current decision node'
-        console.log node
-        if node != null
-            @current_action = node.action
-            # TODO: enable the try/catch
-            # try
-            @[@current_action]()
-            # catch err
-            #     console.error err
-        else
-            console.log "We have no action to take. Returned node is null"
+        for i in [1..@speed]
+            node = @decision.make_decision @
+            # console.log 'Current decision node'
+            # console.log node
+            if node != null
+                @current_action = node.action
+                # TODO: enable the try/catch
+                try
+                    @[@current_action]()
+                catch err
+                    console.error err
+            else
+                console.log "We have no action to take. Returned node is null"
 
-            # throw 'asdf'
 

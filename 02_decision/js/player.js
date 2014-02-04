@@ -79,7 +79,6 @@
       new_bonuses = new Array;
       if (this.active_bonuses.length > 0) {
         for (i = _i = 0, _ref1 = this.active_bonuses.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-          console.log(i);
           o = this.active_bonuses[i];
           o.timeout -= 1;
           if (o.timeout === 0) {
@@ -124,8 +123,6 @@
           this.seeable_objects.push(o);
         }
       }
-      console.log("Seeable objects", this.seeable_objects);
-      console.log("Result", this.seeable_objects.length);
       return this.seeable_objects.length !== 0;
     };
 
@@ -153,8 +150,6 @@
       var nx, ny, tile, x, y, _ref1, _ref2;
       if (this.current_path === null) {
         _ref1 = this.pick_random_unexplored_tile(), x = _ref1[0], y = _ref1[1];
-        console.log("New target");
-        console.log(x, y);
         tile = this.map.tiles[x][y];
         this.current_path = this.find_path_to_target(tile);
         if (!this.current_path) {
@@ -173,17 +168,24 @@
     };
 
     _Player.prototype.do_action = function() {
-      var node;
+      var err, i, node, _i, _ref1, _results;
       this.process_bonuses();
-      node = this.decision.make_decision(this);
-      console.log('Current decision node');
-      console.log(node);
-      if (node !== null) {
-        this.current_action = node.action;
-        return this[this.current_action]();
-      } else {
-        return console.log("We have no action to take. Returned node is null");
+      _results = [];
+      for (i = _i = 1, _ref1 = this.speed; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
+        node = this.decision.make_decision(this);
+        if (node !== null) {
+          this.current_action = node.action;
+          try {
+            _results.push(this[this.current_action]());
+          } catch (_error) {
+            err = _error;
+            _results.push(console.error(err));
+          }
+        } else {
+          _results.push(console.log("We have no action to take. Returned node is null"));
+        }
       }
+      return _results;
     };
 
     return _Player;
