@@ -80,7 +80,7 @@
   this.DecisionBuilder = (function() {
     function _Class() {}
 
-    _Class.prototype.gen_new_node = function(action, condition) {
+    _Class.prototype.gen_new_node = function(condition, action) {
       var node;
       node = new DecisionTreeNode;
       node.init();
@@ -90,14 +90,17 @@
     };
 
     _Class.prototype.gen_always_true = function(action) {
-      return this.gen_new_node(action, COND_ALWAYS_TRUE);
+      return this.gen_new_node(COND_ALWAYS_TRUE, action);
     };
 
     _Class.prototype.generate_tree = function() {
-      var explore, root, see, tree;
+      var explore, root, see, see_powerup, tree;
       root = this.gen_new_node(null, null);
-      see = this.gen_new_node(null, 'can_see_object');
       explore = this.gen_always_true('explore');
+      see_powerup = this.gen_new_node('is_object_consumable', 'consume_object');
+      see = this.gen_new_node('can_see_object', null);
+      see.left = see_powerup;
+      see.right = explore;
       root.left = see;
       root.right = explore;
       tree = new DecisionTree;

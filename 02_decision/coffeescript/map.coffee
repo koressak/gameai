@@ -35,11 +35,13 @@
         x = @posx * tile_width
         y = @posy * tile_height
         window.pinst.image(@image, x, y, tile_width, tile_height)
-        if not @explored
-            window.pinst.image(@unexplored_image, x, y, tile_width, tile_height)
 
         if @object != null
             @object.draw()
+
+        # If tile is unexplored we have to cover it with new layer
+        if not @explored
+            window.pinst.image(@unexplored_image, x, y, tile_width, tile_height)
 
 
 

@@ -58,10 +58,10 @@
       var step;
       step = this.current_path.splice(0, 1);
       if (step.length > 0) {
+        this.explored_tiles[step[0].posx][step[0].posy] = true;
         return [step[0].posx - this.posx, step[0].posy - this.posy];
       } else {
         this.current_path = null;
-        this.current_target = null;
       }
       return [0, 0];
     };
@@ -86,6 +86,7 @@
     };
 
     _Player.prototype.set_goal = function(obj) {
+      this.current_path = null;
       return this.current_goal = obj;
     };
 
@@ -104,7 +105,15 @@
           this.seeable_objects.push(o);
         }
       }
+      console.log("Seeable objects", this.seeable_objects);
+      console.log("Result", this.seeable_objects.length);
       return this.seeable_objects.length !== 0;
+    };
+
+    _Player.prototype.is_object_consumable = function() {
+      var obj;
+      obj = this.seeable_objects[0];
+      return obj instanceof PowerUp;
     };
 
     _Player.prototype.pick_random_unexplored_tile = function() {
@@ -137,21 +146,23 @@
       return this.move(nx, ny);
     };
 
+    _Player.prototype.consume_object = function() {
+      var obj;
+      obj = this.seeable_objects.splice(0, 1)[0];
+      obj.consume(this);
+      return this.move(obj.posx - this.posx, obj.posy - this.posy);
+    };
+
     _Player.prototype.do_action = function() {
       var node;
-      if (this.is_acting()) {
+      node = this.decision.make_decision(this);
+      console.log('Current decision node');
+      console.log(node);
+      if (node !== null) {
+        this.current_action = node.action;
         return this[this.current_action]();
       } else {
-        node = this.decision.make_decision(this);
-        console.log('Current decision node');
-        console.log(node);
-        if (node !== null) {
-          this.current_action = node.action;
-          this[this.current_action]();
-        } else {
-          console.log("We have no action to take. Returned node is null");
-        }
-        throw 'asdf';
+        return console.log("We have no action to take. Returned node is null");
       }
     };
 

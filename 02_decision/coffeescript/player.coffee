@@ -62,10 +62,11 @@
 
         step = @current_path.splice(0,1)
         if step.length > 0
+            @explored_tiles[step[0].posx][step[0].posy] = true
             return [step[0].posx-@posx, step[0].posy-@posy]
         else
             @current_path = null
-            @current_target = null
+            # @current_target = null
 
         [0,0]
 
@@ -86,6 +87,7 @@
         1
 
     set_goal: (obj) ->
+        @current_path = null
         @current_goal = obj
 
 
@@ -102,9 +104,19 @@
             if o != null
                 @seeable_objects.push o
 
-        # console.log "Seeable objects", @seeable_objects
-        # console.log "Result", @seeable_objects.length
+        console.log "Seeable objects", @seeable_objects
+        console.log "Result", @seeable_objects.length
         @seeable_objects.length != 0
+
+    is_object_consumable: ->
+        # If the seeable object is consumable (powerup)
+        # For starters - we pick just the first one we see
+        obj = @seeable_objects[0]
+        # console.log 'Is consumable'
+        # console.log obj
+        # console.log obj instanceof PowerUp
+        obj instanceof PowerUp
+
 
     # --- Explore nearby surroundings
     pick_random_unexplored_tile: ->
@@ -135,9 +147,15 @@
         @move nx, ny
 
 
+    # --- Interact with nearby objects
+    consume_object: ->
+        # Consume nearby object (powerup in this case)
+        obj = @seeable_objects.splice(0,1)[0]
 
-
-
+        # consume it's power
+        obj.consume @
+        # move to it's place
+        @move obj.posx-@posx, obj.posy-@posy
 
 
     # --- Main loop for a player - make and execute decision
@@ -145,20 +163,21 @@
     do_action: ->
 
         # TODO: has to check for new events 
-        if @is_acting()
+        # if @is_acting()
+        #     @[@current_action]()
+        # else
+        node = @decision.make_decision @
+        console.log 'Current decision node'
+        console.log node
+        if node != null
+            @current_action = node.action
+            # TODO: enable the try/catch
+            # try
             @[@current_action]()
+            # catch err
+            #     console.error err
         else
-            node = @decision.make_decision @
-            console.log 'Current decision node'
-            console.log node
-            if node != null
-                @current_action = node.action
-                # try
-                @[@current_action]()
-                # catch err
-                #     console.error err
-            else
-                console.log "We have no action to take. Returned node is null"
+            console.log "We have no action to take. Returned node is null"
 
-            throw 'asdf'
+            # throw 'asdf'
 

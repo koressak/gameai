@@ -49,11 +49,11 @@
       x = this.posx * tile_width;
       y = this.posy * tile_height;
       window.pinst.image(this.image, x, y, tile_width, tile_height);
-      if (!this.explored) {
-        window.pinst.image(this.unexplored_image, x, y, tile_width, tile_height);
-      }
       if (this.object !== null) {
-        return this.object.draw();
+        this.object.draw();
+      }
+      if (!this.explored) {
+        return window.pinst.image(this.unexplored_image, x, y, tile_width, tile_height);
       }
     };
 

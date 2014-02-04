@@ -17,13 +17,6 @@
       return this.type = '';
     };
 
-    _PowerUp.prototype.pick_up = function(player) {
-      if (this.type !== '') {
-        player.add_bonus(this);
-        return this.remove_from_game();
-      }
-    };
-
     return _PowerUp;
 
   })(this.GameObject);
@@ -44,6 +37,12 @@
       return this.load_image();
     };
 
+    _SpeedPowerUp.prototype.consume = function(player) {
+      player[this.type] += this.bonus;
+      console.log("Removing powerup from game", this);
+      return this.remove_from_game();
+    };
+
     return _SpeedPowerUp;
 
   })(this.PowerUp);
@@ -62,6 +61,12 @@
       this.type = 'health';
       this.image = 'images/powerups/health.png';
       return this.load_image();
+    };
+
+    _HealthPowerUp.prototype.consume = function(player) {
+      player[this.type] += this.bonus;
+      console.log("Removing powerup from game", this);
+      return this.remove_from_game();
     };
 
     return _HealthPowerUp;

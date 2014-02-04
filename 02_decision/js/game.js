@@ -37,7 +37,7 @@
           p.do_action();
         }
         ind = Math.floor(Math.random() * 100);
-        if (ind <= 5) {
+        if (ind <= powerup_spawn_percent) {
           this.spawn_powerup();
         }
       }

@@ -4,11 +4,6 @@
         @timeout = 0  # Timeout for 20 sec
         @type = ''
 
-    pick_up: (player) ->
-        if @type != ''
-            player.add_bonus @
-            @remove_from_game()
-
 
 @SpeedPowerUp = class _SpeedPowerUp extends @PowerUp
     init: ->
@@ -18,6 +13,11 @@
         @image = 'images/powerups/speed.png'
         @load_image()
 
+    consume: (player) ->
+        player[@type] += @bonus
+        console.log "Removing powerup from game", @
+        @remove_from_game()
+
 
 @HealthPowerUp = class _HealthPowerUp extends @PowerUp
     init: ->
@@ -26,4 +26,9 @@
         @type = 'health'
         @image = 'images/powerups/health.png'
         @load_image()
+        
+    consume: (player) ->
+        player[@type] += @bonus
+        console.log "Removing powerup from game", @
+        @remove_from_game()
  

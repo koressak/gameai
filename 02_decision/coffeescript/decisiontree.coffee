@@ -66,7 +66,7 @@
 
 @DecisionBuilder = class
 
-    gen_new_node: (action, condition) ->
+    gen_new_node: (condition, action) ->
         node = new DecisionTreeNode
         node.init()
         node.action = action
@@ -74,14 +74,20 @@
         node
 
     gen_always_true: (action) ->
-        @gen_new_node action, COND_ALWAYS_TRUE
+        @gen_new_node COND_ALWAYS_TRUE, action
 
     generate_tree: () ->
         # Create the tree to cover all the actions
         root = @gen_new_node null, null
 
-        see = @gen_new_node null, 'can_see_object'
         explore = @gen_always_true 'explore'
+
+        # what to do when see an object
+        see_powerup = @gen_new_node 'is_object_consumable', 'consume_object'
+        see = @gen_new_node 'can_see_object', null
+
+        see.left = see_powerup
+        see.right = explore
 
         root.left = see
         root.right = explore
