@@ -32,7 +32,7 @@
 
         delta = now - @last_move_time
         # Player movement
-        if delta > 300
+        if delta > frame_step
             @last_move_time = now
             for i in [0..@players.length-1]
                 p = @players[i] 

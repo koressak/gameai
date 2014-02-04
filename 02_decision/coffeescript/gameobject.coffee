@@ -4,6 +4,7 @@
         @posy = -1
         @image = ''
         @img = null
+        @speed = 0
 
     set_position: (x, y) ->
         @posx = x

@@ -9,6 +9,7 @@
       this.posy = -1;
       this.image = '';
       this.img = null;
+      this.speed = 0;
     }
 
     _Class.prototype.set_position = function(x, y) {

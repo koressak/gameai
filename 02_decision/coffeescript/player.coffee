@@ -41,6 +41,7 @@
         @current_goal = null
         @current_path = null
         @seeable_objects = new Array
+        @active_bonuses = new Array
 
     set_state: (state) ->
         @state = state
@@ -75,6 +76,24 @@
         p = new Path
         path = p.find_path @, obj
         path
+
+
+    process_bonuses: ->
+        new_bonuses = new Array
+
+        if @active_bonuses.length > 0
+            for i in [0..@active_bonuses.length-1]
+                console.log i
+                o = @active_bonuses[i]
+                o.timeout -= 1
+                if o.timeout == 0
+                    o.do_timeout @
+                else
+                    new_bonuses.push o
+
+        @active_bonuses = new_bonuses
+
+
 
     # --------- Target cond and decision -----------
     is_acting: ->
@@ -163,6 +182,10 @@
     do_action: ->
 
         # TODO: has to check for new events 
+
+        # Process expiry of bonuses
+        @process_bonuses()
+
         # if @is_acting()
         #     @[@current_action]()
         # else

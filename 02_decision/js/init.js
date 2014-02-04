@@ -10,6 +10,7 @@
     _this.tile_width = 30;
     _this.tile_height = 30;
     _this.rock_count = 100;
+    _this.frame_step = 300;
     _this.powerup_spawn_percent = 15;
     _this.max_players = 5;
     _this.max_targets = 5;

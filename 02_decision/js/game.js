@@ -30,7 +30,7 @@
       var delta, i, ind, now, p, _i, _ref;
       now = new Date;
       delta = now - this.last_move_time;
-      if (delta > 300) {
+      if (delta > frame_step) {
         this.last_move_time = now;
         for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           p = this.players[i];

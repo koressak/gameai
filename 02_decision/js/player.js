@@ -47,7 +47,8 @@
       this.current_action = null;
       this.current_goal = null;
       this.current_path = null;
-      return this.seeable_objects = new Array;
+      this.seeable_objects = new Array;
+      return this.active_bonuses = new Array;
     };
 
     _Player.prototype.set_state = function(state) {
@@ -71,6 +72,24 @@
       p = new Path;
       path = p.find_path(this, obj);
       return path;
+    };
+
+    _Player.prototype.process_bonuses = function() {
+      var i, new_bonuses, o, _i, _ref1;
+      new_bonuses = new Array;
+      if (this.active_bonuses.length > 0) {
+        for (i = _i = 0, _ref1 = this.active_bonuses.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
+          console.log(i);
+          o = this.active_bonuses[i];
+          o.timeout -= 1;
+          if (o.timeout === 0) {
+            o.do_timeout(this);
+          } else {
+            new_bonuses.push(o);
+          }
+        }
+      }
+      return this.active_bonuses = new_bonuses;
     };
 
     _Player.prototype.is_acting = function() {
@@ -155,6 +174,7 @@
 
     _Player.prototype.do_action = function() {
       var node;
+      this.process_bonuses();
       node = this.decision.make_decision(this);
       console.log('Current decision node');
       console.log(node);
