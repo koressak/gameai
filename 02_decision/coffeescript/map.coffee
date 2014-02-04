@@ -7,6 +7,9 @@
         @terrain = terrain
         @posx = x
         @posy = y
+        @object = null
+        @explored = false
+        @unexplored_image = null
 
     load_image: ->
         switch @terrain
@@ -15,11 +18,40 @@
             when window.TERRAIN_ROCK
                 @image = pinst.loadImage('images/rock.png')
 
+        @unexplored_image = pinst.loadImage('images/unexplored.png')
+
+    set_object: (obj) ->
+        @object = obj
+
+    get_object: ->
+        @object
+
+    remove_object: ->
+        o = @object
+        @object = null
+        o
+
+    is_walkable: ->
+        if not @walkable
+            return false
+
+        if @object != null 
+            if @object instanceof Player
+                return false
+
+        true
 
     draw: () ->
         x = @posx * tile_width
         y = @posy * tile_height
         window.pinst.image(@image, x, y, tile_width, tile_height)
+
+        if @object != null
+            @object.draw()
+
+        # If tile is unexplored we have to cover it with new layer
+        if not @explored
+            window.pinst.image(@unexplored_image, x, y, tile_width, tile_height)
 
 
 
@@ -41,32 +73,61 @@
     add_game_object: (obj) ->
         if $.inArray obj, @game_objects == -1
             @game_objects.push obj
+            @tiles[obj.posx][obj.posy].set_object obj
+
+    move_game_object: (ox, oy, nx, ny) ->
+        # Set tile explored if someone is moving to it
+        @set_tile_explored nx, ny
+        o = @tiles[ox][oy].remove_object()
+        if o != null
+            @tiles[nx][ny].set_object o
 
     remove_game_object: (obj) ->
         ind =  $.inArray obj, @game_objects
 
         if ind != -1
+            o = @game_objects[ind]
+            @tiles[o.posx][o.posy].remove_object()
             @game_objects.splice ind, 1
 
-    is_walkable: (x, y) ->
+    is_tile_walkable: (x, y) ->
         if x < 0 or x > @width-1
             return false
         if y < 0 or y > @height-1
             return false
 
         t = @tiles[x][y]
-        t.walkable
+        t.is_walkable()
+
+    is_tile_free: (x, y) ->
+        if x < 0 or x > @width-1
+            return false
+        if y < 0 or y > @height-1
+            return false
+
+        @tiles[x][y].get_object() == null
+
+    get_tile_object: (x, y) ->
+        if x < 0 or x > @width-1
+            return null
+        if y < 0 or y > @height-1
+            return null 
+
+        @tiles[x][y].get_object()
+
+    set_tile_explored: (x, y) ->
+        @tiles[x][y].explored = true
 
     get_adjacent_tiles: (x, y) ->
         tiles = new Array
-        if x-1 >= 0 and @is_walkable x-1, y
+        if x-1 >= 0 and @is_tile_walkable x-1, y
             tiles.push @tiles[x-1][y]
-        if x+1 <= @width-1 and @is_walkable x+1, y
+        if x+1 <= @width-1 and @is_tile_walkable x+1, y
             tiles.push @tiles[x+1][y]
 
-        if y-1 >= 0 and @is_walkable x, y-1
+        if y-1 >= 0 and @is_tile_walkable x, y-1
             tiles.push @tiles[x][y-1]
-        if y+1 <= @height-1 and @is_walkable x, y+1
+        if y+1 <= @height-1 and @is_tile_walkable x, y+1
             tiles.push @tiles[x][y+1]
 
         return tiles
@@ -76,8 +137,8 @@
             for y in [0..@height-1]
                 @tiles[x][y].draw()
 
-        for obj in @game_objects
-            obj.draw()
+        # for obj in @game_objects
+        #     obj.draw()
 
 
 

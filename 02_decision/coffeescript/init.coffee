@@ -7,6 +7,9 @@
     @tile_width = 30
     @tile_height = 30
     @rock_count = 100
+    @frame_step = 300 # 300 ms as a step
+
+    @powerup_spawn_percent = 15
 
     @max_players = 5
     @max_targets = 5

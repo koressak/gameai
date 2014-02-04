@@ -3,15 +3,19 @@
 @SIGHT_DOWN = 2
 @SIGHT_LEFT = 3
 
-@Player = class
+@PSTATE_EXPLORE = 0
+@PSTATE_ATTACK = 1
+
+@Player = class _Player extends @MovableGameObject
     init: ->
-        @image = null
-        @posx = 0
-        @posy = 0
+        @image = 'images/soldier.png'
         @load_image()
-        @current_target = null
-        @current_path = null
         @score = 0
+
+
+        dbuilder = new DecisionBuilder
+        @decision = dbuilder.generate_tree()
+        # console.log @decision
 
         @health = 100
         @damage = 5
@@ -19,73 +23,53 @@
         @sight_radius = 2
         @direction = SIGHT_LEFT
 
-    set_position: (x, y) ->
-        @posx = x
-        @posy = y
+        # Save game map
+        @map = g.get_map()
 
-    move: (x, y) ->
-        # Move in positive or negative direction
-        map = g.get_map()
-        nposx = @posx
-        nposy = @posy
+        # Init personal explored tile arrays
+        @explored_tiles = new Array(@map.width)
+        for i in [0..@map.width-1]
+            @explored_tiles[i] = new Array(@map.height)
+            for u in [0..@map.height-1]
+                @explored_tiles[i][u] = false
 
-        if x > 0
-            nposx += 1
-        else if x < 0
-            nposx -=1
+        # console.log @explored_tiles
 
-        if y > 0
-            nposy += 1
-        else if y < 0
-            nposy -=1
-
-        if map.is_walkable nposx, nposy
-            @posx = nposx
-            @posy = nposy
-
-    load_image: ->
-        @image = pinst.loadImage('images/soldier.png')
-
-    draw: () ->
-        x = @posx * tile_width
-        y = @posy * tile_height
-        window.pinst.image(@image, x, y, tile_width, tile_height)
-
-    has_target: ->
-        @current_target != null
-
-    set_target: (obj) ->
-        @current_target = obj
-
-    clear_current_goal: ->
-        @current_target = null
+        # Decision variables
+        @state = PSTATE_EXPLORE
+        @current_action = null
+        @current_goal = null
         @current_path = null
+        @seeable_objects = new Array
+        @active_bonuses = new Array
+
+    set_state: (state) ->
+        @state = state
 
     get_next_move: () ->
 
-        g = window.g
+        # g = window.g
 
-        if @current_target != null
+        # if @current_target != null
 
-            ind = $.inArray(@current_target, g.targets)
-            if ind == -1
-                t = g.get_random_target()
-                @clear_current_goal()
-                @set_target t
+        #     ind = $.inArray(@current_target, g.targets)
+        #     if ind == -1
+        #         t = g.get_random_target()
+        #         @clear_current_goal()
+        #         @set_target t
 
-            if @current_path == null
-                @current_path = @find_path_to_target @current_target
+        #     if @current_path == null
+        #         @current_path = @find_path_to_target @current_target
 
-            step = @current_path.splice(0,1)
-            if step.length > 0
-                return [step[0].posx-@posx, step[0].posy-@posy]
-            else
-                @current_path = null
-                @current_target = null
+        step = @current_path.splice(0,1)
+        if step.length > 0
+            @explored_tiles[step[0].posx][step[0].posy] = true
+            return [step[0].posx-@posx, step[0].posy-@posy]
+        else
+            @current_path = null
+            # @current_target = null
 
         [0,0]
-
-
 
     find_path_to_target: (obj) ->
         # A* algorithm implementation
@@ -93,29 +77,126 @@
         path = p.find_path @, obj
         path
 
-    do_action: () ->
-        unless @current_target
-            @current_target = g.get_random_target()
-            
+
+    process_bonuses: ->
+        new_bonuses = new Array
+
+        if @active_bonuses.length > 0
+            for i in [0..@active_bonuses.length-1]
+                o = @active_bonuses[i]
+                o.timeout -= 1
+                if o.timeout == 0
+                    o.do_timeout @
+                else
+                    new_bonuses.push o
+
+        @active_bonuses = new_bonuses
 
 
 
-# @Target = class
-#     init: ->
-#         @image = null
-#         @posx = 0
-#         @posy = 0
-#         @load_image()
+    # --------- Target cond and decision -----------
+    is_acting: ->
+        @current_action != null
 
-#     load_image: ->
-#         @image = pinst.loadImage('images/chest.png')
+    has_goal: ->
+        @current_goal != null
 
-#     set_position: (x, y) ->
-#         @posx = x
-#         @posy = y
+    get_goal: ->
+        1
 
-#     draw: () ->
-#         x = @posx * tile_width
-#         y = @posy * tile_height
-#         window.pinst.image(@image, x, y, tile_width, tile_height)
+    set_goal: (obj) ->
+        @current_path = null
+        @current_goal = obj
+
+
+    clear_current_goal: ->
+        @current_goal = null
+        @current_path = null
+
+    #  --- Can player see something?
+    can_see_object: ->
+        @seeable_objects = new Array
+        tiles = @map.get_adjacent_tiles @posx, @posy
+        for i in [0..tiles.length-1]
+            o = tiles[i].get_object()
+            if o != null
+                @seeable_objects.push o
+
+        # console.log "Seeable objects", @seeable_objects
+        # console.log "Result", @seeable_objects.length
+        @seeable_objects.length != 0
+
+    is_object_consumable: ->
+        # If the seeable object is consumable (powerup)
+        # For starters - we pick just the first one we see
+        obj = @seeable_objects[0]
+        # console.log 'Is consumable'
+        # console.log obj
+        # console.log obj instanceof PowerUp
+        obj instanceof PowerUp
+
+
+    # --- Explore nearby surroundings
+    pick_random_unexplored_tile: ->
+        good = false
+        # TODO: have to protect against all tiles explored
+        while not good
+            x = get_random_int 0, @map.width-1
+            y = get_random_int 0, @map.height-1
+            if not @explored_tiles[x][y]
+                if @map.is_tile_walkable x, y
+                    return [x, y]
+
+
+    explore: ->
+        # Pick random unexplored tile if not already done
+        if @current_path == null
+            [x, y] = @pick_random_unexplored_tile()
+            # console.log "New target"
+            # console.log x, y
+            tile = @map.tiles[x][y]
+            @current_path = @find_path_to_target tile
+            # console.log "New path", @current_path
+
+            if not @current_path
+                throw "No feasible path found, cannot move further :("
+
+        [nx, ny] = @get_next_move()
+        @move nx, ny
+
+
+    # --- Interact with nearby objects
+    consume_object: ->
+        # Consume nearby object (powerup in this case)
+        obj = @seeable_objects.splice(0,1)[0]
+
+        # consume it's power
+        obj.consume @
+        # move to it's place
+        @move obj.posx-@posx, obj.posy-@posy
+
+
+    # --- Main loop for a player - make and execute decision
+
+    do_action: ->
+
+        # TODO: has to check for new events 
+
+        # Process expiry of bonuses
+        @process_bonuses()
+
+        for i in [1..@speed]
+            node = @decision.make_decision @
+            # console.log 'Current decision node'
+            # console.log node
+            if node != null
+                @current_action = node.action
+                # TODO: enable the try/catch
+                try
+                    @[@current_action]()
+                catch err
+                    console.error err
+            else
+                console.log "We have no action to take. Returned node is null"
+
 

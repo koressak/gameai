@@ -14,8 +14,9 @@
         @players = new Array
 
         @spawn_new_player()
-        @spawn_new_player()
+        # @spawn_new_player()
         @update_ui()
+
 
     get_player: (x) ->
         if x < @players.length
@@ -26,40 +27,22 @@
     get_map: () ->
         @map
 
-    is_tile_free: (x, y) ->
-        good = true
-        if @players.length == 0
-            return good
-        for i in [0..@players.length-1]
-            p = @players[i] 
-            if p.posx == x and p.posy == y
-                good = false
-        good
-
-
     game_loop: () ->
         now = new Date
 
         delta = now - @last_move_time
         # Player movement
-        if delta > 300
+        if delta > frame_step
             @last_move_time = now
             for i in [0..@players.length-1]
                 p = @players[i] 
                 p.do_action()
 
-            # ind = Math.floor(Math.random()*100)
-            # if ind <= 20
-            #     @spawn_new_target()
+            ind = Math.floor(Math.random()*100)
+            if ind <= powerup_spawn_percent
+                @spawn_powerup()
         @update_ui()
 
-
-    get_random_target: () ->
-        if @players.length == 0
-            return null
-
-        ind = Math.floor(Math.random()*@players.length)
-        @players[ind]
 
     spawn_new_player: () ->
         # Instantiate player object and place him randomly on screen
@@ -73,39 +56,44 @@
         while not good
             posx = get_random_int 0, @map.width-1
             posy = get_random_int 0, @map.height-1
-            if @map.is_walkable posx, posy
-                if @is_tile_free posx, posy
+            if @map.is_tile_walkable posx, posy
+                if @map.is_tile_free posx, posy
                     good = true
                     p.set_position posx, posy
+                    @map.set_tile_explored posx, posy
 
         @players.push p
         @map.add_game_object p
 
-    # spawn_new_target: () ->
+    spawn_powerup: () ->
 
-    #     if @targets.length >= max_targets
-    #         return 
-            
-    #     t = new Target
-    #     t.init()
-    #     good = false
-    #     while not good
-    #         posx = get_random_int 0, @map.width-1
-    #         posy = get_random_int 0, @map.height-1
-    #         if @is_tile_free posx, posy
-    #             if @map.is_walkable posx, posy
-    #                 good = true
-    #                 t.set_position posx, posy
+        type = get_random_int 0, 1
+        if type == 0
+            p = new HealthPowerUp
+        else
+            p = new SpeedPowerUp
 
-    #     @targets.push t
-    #     @map.add_game_object t
+        p.init()
+        good = false
+        while not good
+            posx = get_random_int 0, @map.width-1
+            posy = get_random_int 0, @map.height-1
+            if @map.is_tile_free posx, posy
+                if @map.is_tile_walkable posx, posy
+                    if @map.get_tile_object(posx, posy) == null
+                        good = true
+                        p.set_position posx, posy
+
+        p.add_to_game()
 
 
     update_ui: () ->
         stats.html("")
         for i in [0..@players.length-1]
             p = @players[i] 
-            stats.append("<p><strong>Player "+i+"</strong><br>")
-            stats.append("Score: "+p.score+"</p>")
-            stats.append("Health: "+p.health+"</p><br>")
+            stats.append("<p><strong>Player "+(i+1)+"</strong><br>")
+            stats.append("Score: "+p.score+"<br>")
+            stats.append("Health: "+p.health+"<br>")
+            stats.append("Speed: "+p.speed+"<br>")
+            stats.append("</p><br>")
 
