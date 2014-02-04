@@ -31,6 +31,16 @@
         @object = null
         o
 
+    is_walkable: ->
+        if not @walkable
+            return false
+
+        if @object != null 
+            if @object instanceof Player
+                return false
+
+        true
+
     draw: () ->
         x = @posx * tile_width
         y = @posy * tile_height
@@ -87,7 +97,7 @@
             return false
 
         t = @tiles[x][y]
-        t.walkable
+        t.is_walkable()
 
     is_tile_free: (x, y) ->
         if x < 0 or x > @width-1

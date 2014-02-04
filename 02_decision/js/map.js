@@ -44,6 +44,18 @@
       return o;
     };
 
+    _Class.prototype.is_walkable = function() {
+      if (!this.walkable) {
+        return false;
+      }
+      if (this.object !== null) {
+        if (this.object instanceof Player) {
+          return false;
+        }
+      }
+      return true;
+    };
+
     _Class.prototype.draw = function() {
       var x, y;
       x = this.posx * tile_width;
@@ -119,7 +131,7 @@
         return false;
       }
       t = this.tiles[x][y];
-      return t.walkable;
+      return t.is_walkable();
     };
 
     _Class.prototype.is_tile_free = function(x, y) {
