@@ -5,7 +5,7 @@
   controllers = angular.module('gai.controllers');
 
   controllers.controller('GameCtrl', [
-    '$scope', '$rootScope', function($scope, $rootScope) {
+    '$scope', '$rootScope', '$location', '$anchorScroll', function($scope, $rootScope, $location, $anchorScroll) {
       var el;
       window.board_width = 630;
       window.board_height = 630;
@@ -22,7 +22,22 @@
       el = document.getElementById('gamecanvas');
       window.pinst = new Processing(el, window.sketchProcess);
       window.g = new window.Game;
-      return window.g.init_game();
+      window.g.init_game();
+      pinst.noLoop();
+      $scope.is_game_running = false;
+      $scope.toggle_game = function() {
+        if ($scope.is_game_running) {
+          pinst.noLoop();
+          return $scope.is_game_running = false;
+        } else {
+          pinst.loop();
+          return $scope.is_game_running = true;
+        }
+      };
+      return $scope.scroll_to = function(id) {
+        $location.hash(id);
+        return $anchorScroll();
+      };
     }
   ]);
 

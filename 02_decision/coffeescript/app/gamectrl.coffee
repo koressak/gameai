@@ -1,6 +1,6 @@
 controllers = angular.module('gai.controllers')
 
-controllers.controller 'GameCtrl', ['$scope', '$rootScope', ($scope, $rootScope) ->
+controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$anchorScroll', ($scope, $rootScope, $location, $anchorScroll) ->
     # Base game definitions
     window.board_width = 630
     window.board_height = 630
@@ -33,5 +33,25 @@ controllers.controller 'GameCtrl', ['$scope', '$rootScope', ($scope, $rootScope)
     # Initialize and run game
     window.g = new window.Game
     window.g.init_game()
+
+    # Stop game at the beginning
+    pinst.noLoop()
+    $scope.is_game_running = false
+
+    $scope.toggle_game = () ->
+        if $scope.is_game_running
+            pinst.noLoop()
+            $scope.is_game_running = false
+        else
+            pinst.loop()
+            $scope.is_game_running = true
+        # $scope.$apply()
+
+
+
+    $scope.scroll_to = (id) ->
+        $location.hash(id)
+        $anchorScroll()
+
 
 ]
