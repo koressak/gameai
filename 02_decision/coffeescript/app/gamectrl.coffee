@@ -2,23 +2,22 @@ controllers = angular.module('gai.controllers')
 
 controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$anchorScroll', ($scope, $rootScope, $location, $anchorScroll) ->
     # Base game definitions
-    # window.board_width = 630
-    # window.board_height = 630
-    # window.tile_no_x = 21
-    # window.tile_no_y = 21
-    window.board_width = 300
-    window.board_height = 300
-    window.tile_no_x = 10
-    window.tile_no_y = 10
+    # window.board_width = 600
+    # window.board_height = 600
+    # window.tile_no_x = 20
+    # window.tile_no_y = 20
+    window.board_width = 450
+    window.board_height = 390
+    window.tile_no_x = 15
+    window.tile_no_y = 13
     window.tile_width = 30
     window.tile_height = 30
-    # window.rock_count = 100
-    window.rock_count = 10
+    window.rock_count = 50
     window.frame_step = 300 # 300 ms as a step
 
     window.powerup_spawn_percent = 15
     window.winning_score = 5
-    window.max_players = 2
+    window.max_players = 5
     # window.max_targets = 5
 
     $scope.is_game_running = false

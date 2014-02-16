@@ -7,17 +7,17 @@
   controllers.controller('GameCtrl', [
     '$scope', '$rootScope', '$location', '$anchorScroll', function($scope, $rootScope, $location, $anchorScroll) {
       var el;
-      window.board_width = 300;
-      window.board_height = 300;
-      window.tile_no_x = 10;
-      window.tile_no_y = 10;
+      window.board_width = 450;
+      window.board_height = 390;
+      window.tile_no_x = 15;
+      window.tile_no_y = 13;
       window.tile_width = 30;
       window.tile_height = 30;
-      window.rock_count = 10;
+      window.rock_count = 50;
       window.frame_step = 300;
       window.powerup_spawn_percent = 15;
       window.winning_score = 5;
-      window.max_players = 2;
+      window.max_players = 5;
       $scope.is_game_running = false;
       $scope.game_loaded = false;
       $scope.winning_score = winning_score;

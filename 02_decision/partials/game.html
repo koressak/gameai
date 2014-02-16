@@ -1,9 +1,9 @@
 <div class="row">
     <div class="col-md-12">
-        <h1>Decision trees - basic orientation</h1>
+        <h1>Decision trees - Deathmatch game</h1>
         <p>
-            Deathmatch between two AI with support of several power ups...
-            <a class="label label-primary" ng-click="scroll_to('description')">Full description</a>
+            Deathmatch between several AIs, power ups added to spice the game...
+            <a class="label label-primary" ng-click="scroll_to('description')">Read more</a>
         </p>
 
     </div>
@@ -21,7 +21,7 @@
                     </li>
                 </ul>
             </div>
-        </div>
+        </div> <!-- panel -->
     </div>
     <div class="col-md-5">
         <h3>Game controls</h3>
@@ -39,23 +39,27 @@
                         <p>
                             Health: <span class="badge">{{player.health}}</span><br>
                             Armor: <span class="badge">{{player.armor}}</span><br>
-                            Speed: <span class="badge">{{player.speed}}</span>
-                            Damage: <span class="badge">{{player.damage}}</span>
+                            Speed: <span class="badge">{{player.speed}}</span><br>
+                            Damage: <span class="badge">{{player.damage}}</span><br>
                             Score: <span class="badge">{{player.score}}</span>
                         </p>
                     </div>
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-md-12">
+            </div>
+        </div> <!-- row -->
     </div>
 </div>
 <div class="row">
     <div class="col-md-8">
     </div>
 </div>
+<h2>Decision trees - simulating real behavior</h2>
 <div class="row" id="description">
     <div class="col-md-6">
-        <h2>Decision trees in unknown environment</h2>
 
         <div class="panel panel-default">
             <div class="panel-heading">
@@ -63,13 +67,14 @@
             </div>
             <div class="panel-body">
                 <p>
-                    The main goal is to eliminate the enemy.<br>
-                    Each player starts with unexplored map, thus not knowing anything about the world around them.<br>
-                    As they explore the world searching for the enemy, they may find several bonus spawn points, which will help them achieve the goal.
+                    The main goal is to eliminate the enemy and reach the winning score - number of kills.<br>
+                    Players have one objective - search and destroy. While exploring the map, they find the powerups (description below) which will boost their stats and help them get the enemy faster and easier.
                 </p>
 
                 <p>Each player is able to fight with the enemy with his fists, inflicting damage
                     (<strong>5 health points</strong>). The attack is possible while standing on the tile next to the enemy.
+                </p>
+                <p>When the player health drops below critical threshold, he flees if he is able to. If not, attacks as a last resort of defence.
                 </p>
             </div>
         </div>
@@ -83,10 +88,13 @@
                 <ul>
                     <li><strong>Health bonus</strong> - instant +20 of players health.</li>
                     <li>
-                        <strong>Speed bonus</strong> - +1 action per frame step, 5 frame steps timeout.
+                        <strong>Speed bonus</strong> - +1 action per frame step, 10 frame steps timeout.
                     </li>
                     <li>
-                        <strong>Damage bonus</strong> - +5 damage points.
+                        <strong>Damage bonus</strong> - +2 damage points, permanent (till death).
+                    </li>
+                    <li>
+                        <strong>Armor bonus</strong> - +5 armor points.
                     </li>
                 </ul>
             </div>
@@ -102,28 +110,6 @@
                 <p>
                     Main goal is to implement the <strong>Decision tree</strong> to simulate behavior of the game player. 
                 </p>
-            </div>
-        </div>
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <strong>Decision tree status</strong>
-            </div>
-            <div class="panel-body">
-                <p>
-                    For each step, the decision tree is traversed to find first node with non empty action and this action is the final decision for the moment.
-                </p>
-                <p>
-                    Currently implemented actions:
-                </p>
-                <ul>
-                    <li>If can see and object
-                        <ul>
-                            <li>If is object consumable - consume</li>
-                            <li>Else explore the map further</li>
-                        </ul>
-                    </li>
-                    <li>Otherwise explore</li>
-                </ul>
             </div>
         </div>
     </div>

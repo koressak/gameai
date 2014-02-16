@@ -6,7 +6,7 @@
 
     consume: (player) ->
         player[@type] += @bonus
-        console.log "Removing powerup from game", @
+        # console.log "Removing powerup from game", @
         @remove_from_game()
 
     pre_consume: (player) ->
@@ -22,7 +22,7 @@
 @SpeedPowerUp = class _SpeedPowerUp extends @PowerUp
     init: ->
         @bonus = 1  # amount of bonus
-        @timeout = 5  # Timeout frame steps 
+        @timeout = 10  # Timeout frame steps 
         @type = 'speed'
         @image = 'images/powerups/speed.png'
         @load_image()
@@ -30,12 +30,12 @@
     consume: (player) ->
         player[@type] += @bonus
         player.active_bonuses.push @
-        console.log "Removing powerup from game", @
+        # console.log "Removing powerup from game", @
         @remove_from_game()
 
     do_timeout: (player) ->
         player[@type] -= @bonus
-        console.log "Bonus timeout", @
+        # console.log "Bonus timeout", @
 
 
 @HealthPowerUp = class _HealthPowerUp extends @PowerUp

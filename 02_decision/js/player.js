@@ -39,6 +39,7 @@
       dbuilder = new DecisionBuilder;
       this.decision = dbuilder.generate_tree();
       this.name = '';
+      this.number = -1;
       this.score = 0;
       this.sight_radius = 1;
       this.respawn_timeout = 0;

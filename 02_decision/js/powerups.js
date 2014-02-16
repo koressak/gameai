@@ -20,7 +20,6 @@
 
     _PowerUp.prototype.consume = function(player) {
       player[this.type] += this.bonus;
-      console.log("Removing powerup from game", this);
       return this.remove_from_game();
     };
 
@@ -50,7 +49,7 @@
 
     _SpeedPowerUp.prototype.init = function() {
       this.bonus = 1;
-      this.timeout = 5;
+      this.timeout = 10;
       this.type = 'speed';
       this.image = 'images/powerups/speed.png';
       return this.load_image();
@@ -59,13 +58,11 @@
     _SpeedPowerUp.prototype.consume = function(player) {
       player[this.type] += this.bonus;
       player.active_bonuses.push(this);
-      console.log("Removing powerup from game", this);
       return this.remove_from_game();
     };
 
     _SpeedPowerUp.prototype.do_timeout = function(player) {
-      player[this.type] -= this.bonus;
-      return console.log("Bonus timeout", this);
+      return player[this.type] -= this.bonus;
     };
 
     return _SpeedPowerUp;

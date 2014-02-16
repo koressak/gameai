@@ -22,6 +22,7 @@
         # console.log @decision
 
         @name = ''
+        @number = -1
         @score = 0
         @sight_radius = 1
 

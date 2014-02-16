@@ -5,6 +5,8 @@
         @image = ''
         @img = null
         @speed = 0
+        @pr = pinst
+        @font = @pr.loadFont('Arial')
 
     set_position: (x, y) ->
         @posx = x
@@ -27,7 +29,13 @@
     draw: () ->
         x = @posx * window.tile_width
         y = @posy * window.tile_height
-        pinst.image(@img, x, y, window.tile_width, window.tile_height)
+        @pr.image(@img, x, y, window.tile_width, window.tile_height)
+
+        # Draw a player name
+        if @ instanceof Player
+            @pr.textFont(@font, 10)
+            @pr.text(@number, x+12, y)
+
 
 
 @MovableGameObject = class _MovableGameObject extends @GameObject

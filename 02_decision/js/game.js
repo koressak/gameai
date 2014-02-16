@@ -68,6 +68,7 @@
       }
       p = new Player;
       p.init();
+      p.number = this.player_counter;
       p.name = 'Player ' + (this.player_counter++);
       good = false;
       while (!good) {
@@ -138,7 +139,8 @@
       this.map.remove_game_object(pl);
       this.scope.new_event("danger", pl.name + " died");
       pl.state = PSTATE_DEATH;
-      return pl.respawn_timeout = get_random_int(10, 20);
+      pl.respawn_timeout = get_random_int(10, 20);
+      return this.scope.new_event("default", pl.name + " will respawn in " + pl.respawn_timeout);
     };
 
     _Class.prototype.player_won = function(pl) {

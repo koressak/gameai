@@ -62,6 +62,7 @@
 
         p = new Player
         p.init()
+        p.number = @player_counter
         p.name = 'Player ' + (@player_counter++)
         good = false
         while not good
@@ -126,6 +127,7 @@
         # Set respawn timeout - from 10 to 20 timeframes
         pl.state = PSTATE_DEATH
         pl.respawn_timeout = get_random_int 10, 20
+        @scope.new_event "default", pl.name + " will respawn in " + pl.respawn_timeout
 
         # @spawn_new_player()
 
