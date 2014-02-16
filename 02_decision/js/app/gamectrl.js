@@ -18,21 +18,29 @@
       window.powerup_spawn_percent = 15;
       window.max_players = 5;
       window.max_targets = 5;
-      window.stats = $("#gamestats");
+      $scope.is_game_running = false;
+      $scope.game_loaded = false;
+      $scope.players = null;
       el = document.getElementById('gamecanvas');
       window.pinst = new Processing(el, window.sketchProcess);
       window.g = new window.Game;
-      window.g.init_game();
+      window.g.init_game($scope);
       pinst.noLoop();
-      $scope.is_game_running = false;
       $scope.toggle_game = function() {
         if ($scope.is_game_running) {
+          console.log("Stopping game");
           pinst.noLoop();
           return $scope.is_game_running = false;
         } else {
+          console.log("Starting game");
           pinst.loop();
+          $scope.game_loaded = true;
           return $scope.is_game_running = true;
         }
+      };
+      $scope.update_ui = function() {
+        $scope.players = g.players;
+        return $scope.$apply();
       };
       return $scope.scroll_to = function(id) {
         $location.hash(id);

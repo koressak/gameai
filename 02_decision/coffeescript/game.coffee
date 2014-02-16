@@ -5,17 +5,19 @@
     constructor: ->
         console.log "Initialization of Game"
 
-    init_game: ->
+    init_game: (scope) ->
         @game_finished = false
         @mrender = new window.MapRenderer
         @map = @mrender.render tile_no_x, tile_no_y
+        @scope = scope
 
         @last_move_time = new Date
         @players = new Array
 
         @spawn_new_player()
-        # @spawn_new_player()
-        @update_ui()
+        @spawn_new_player()
+        # @update_ui()
+        # @scope.update_ui()
 
 
     get_player: (x) ->
@@ -41,7 +43,7 @@
             ind = Math.floor(Math.random()*100)
             if ind <= powerup_spawn_percent
                 @spawn_powerup()
-        @update_ui()
+            @scope.update_ui()
 
 
     spawn_new_player: () ->
@@ -52,6 +54,7 @@
 
         p = new Player
         p.init()
+        p.name = 'Player ' + (@players.length+1)
         good = false
         while not good
             posx = get_random_int 0, @map.width-1
@@ -85,15 +88,4 @@
                         p.set_position posx, posy
 
         p.add_to_game()
-
-
-    update_ui: () ->
-        stats.html("")
-        for i in [0..@players.length-1]
-            p = @players[i] 
-            stats.append("<p><strong>Player "+(i+1)+"</strong><br>")
-            stats.append("Score: "+p.score+"<br>")
-            stats.append("Health: "+p.health+"<br>")
-            stats.append("Speed: "+p.speed+"<br>")
-            stats.append("</p><br>")
 

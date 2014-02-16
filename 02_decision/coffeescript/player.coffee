@@ -17,6 +17,7 @@
         @decision = dbuilder.generate_tree()
         # console.log @decision
 
+        @name = ''
         @health = 100
         @damage = 5
         @speed = 1

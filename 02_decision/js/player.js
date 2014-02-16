@@ -31,6 +31,7 @@
       this.score = 0;
       dbuilder = new DecisionBuilder;
       this.decision = dbuilder.generate_tree();
+      this.name = '';
       this.health = 100;
       this.damage = 5;
       this.speed = 1;

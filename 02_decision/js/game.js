@@ -5,14 +5,15 @@
       console.log("Initialization of Game");
     }
 
-    _Class.prototype.init_game = function() {
+    _Class.prototype.init_game = function(scope) {
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
+      this.scope = scope;
       this.last_move_time = new Date;
       this.players = new Array;
       this.spawn_new_player();
-      return this.update_ui();
+      return this.spawn_new_player();
     };
 
     _Class.prototype.get_player = function(x) {
@@ -41,8 +42,8 @@
         if (ind <= powerup_spawn_percent) {
           this.spawn_powerup();
         }
+        return this.scope.update_ui();
       }
-      return this.update_ui();
     };
 
     _Class.prototype.spawn_new_player = function() {
@@ -52,6 +53,7 @@
       }
       p = new Player;
       p.init();
+      p.name = 'Player ' + (this.players.length + 1);
       good = false;
       while (!good) {
         posx = get_random_int(0, this.map.width - 1);
@@ -91,21 +93,6 @@
         }
       }
       return p.add_to_game();
-    };
-
-    _Class.prototype.update_ui = function() {
-      var i, p, _i, _ref, _results;
-      stats.html("");
-      _results = [];
-      for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = this.players[i];
-        stats.append("<p><strong>Player " + (i + 1) + "</strong><br>");
-        stats.append("Score: " + p.score + "<br>");
-        stats.append("Health: " + p.health + "<br>");
-        stats.append("Speed: " + p.speed + "<br>");
-        _results.push(stats.append("</p><br>"));
-      }
-      return _results;
     };
 
     return _Class;
