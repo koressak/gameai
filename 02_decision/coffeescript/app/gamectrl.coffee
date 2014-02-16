@@ -33,14 +33,13 @@ controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$ancho
             console.log "Stopping game"
             pinst.noLoop()
             $scope.is_game_running = false
-            $scope.new_event "danger", "Game stopped"
+            $scope.new_event "info", "Game stopped"
         else
             console.log "Starting game"
-            $scope.new_event "success", "Game started"
+            $scope.new_event "info", "Game started"
             pinst.loop()
             $scope.game_loaded = true
             $scope.is_game_running = true
-        # $scope.$apply()
 
     $scope.update_ui = () ->
         $scope.players = g.players

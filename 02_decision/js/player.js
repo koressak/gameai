@@ -56,7 +56,7 @@
       this.current_path = null;
       this.seeable_objects = new Array;
       this.active_bonuses = new Array;
-      return this.attack_target = null;
+      return this.retreat_tile = null;
     };
 
     _Player.prototype.set_state = function(state) {
@@ -186,8 +186,30 @@
       return this.health -= dmg;
     };
 
+    _Player.prototype.can_flee = function() {
+      var map, t, tiles, _i, _len;
+      map = g.get_map();
+      tiles = map.get_adjacent_tiles(this.posx, this.posy);
+      console.log("Can flee?");
+      console.log(tiles);
+      for (_i = 0, _len = tiles.length; _i < _len; _i++) {
+        t = tiles[_i];
+        if (t.is_walkable()) {
+          this.retreat_tile = t;
+          console.log("Retreat tile: ", this.retreat_tile);
+          return true;
+        }
+      }
+      return false;
+    };
+
     _Player.prototype.flee = function() {
-      return 1;
+      var nx, ny;
+      this.state = PSTATE_FLEE;
+      console.log(this.name, "Fleeing");
+      nx = this.retreat_tile.posx - this.posx;
+      ny = this.retreat_tile.posy - this.posy;
+      return this.move(nx, ny);
     };
 
     _Player.prototype.pick_random_tile = function() {

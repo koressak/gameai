@@ -27,10 +27,10 @@
           console.log("Stopping game");
           pinst.noLoop();
           $scope.is_game_running = false;
-          return $scope.new_event("danger", "Game stopped");
+          return $scope.new_event("info", "Game stopped");
         } else {
           console.log("Starting game");
-          $scope.new_event("success", "Game started");
+          $scope.new_event("info", "Game started");
           pinst.loop();
           $scope.game_loaded = true;
           return $scope.is_game_running = true;

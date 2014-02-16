@@ -68,6 +68,7 @@
         }
       }
       this.players.push(p);
+      this.scope.new_event("primary", p.name + " has been spawned");
       return this.map.add_game_object(p);
     };
 
@@ -101,7 +102,7 @@
       ind = $.inArray(pl, this.players);
       this.map.remove_game_object(pl);
       this.players.splice(ind, 1);
-      this.scope.new_event("warning", pl.name + " died");
+      this.scope.new_event("danger", pl.name + " died");
       return this.spawn_new_player();
     };
 

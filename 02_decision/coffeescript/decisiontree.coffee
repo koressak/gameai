@@ -88,9 +88,9 @@
         is_fighting = @gen_new_node 'is_fighting', null
         is_health_good = @gen_new_node 'is_health_good', 'attack'
         attack = @gen_always_true 'attack'
-        flee = @gen_always_true 'flee'
         fsee_player = @gen_new_node 'is_object_player', null
         fsee = @gen_new_node 'can_see_object', null
+        can_flee = @gen_new_node 'can_flee', 'flee'
 
         # Exploring
         search_player = @gen_always_true 'search_player'
@@ -105,14 +105,13 @@
 
 
         # --- Connection of the tree
-        see_player.children.push can_attack, flee
+        see_player.children.push can_attack, can_flee
         see.children.push see_player, see_powerup
 
         # Fighting subtree
-        is_health_good.children.push attack, flee
 
         # is_fighting
-        fsee_player.children.push is_health_good, flee
+        fsee_player.children.push is_health_good, can_flee, attack
         fsee.children.push fsee_player, search_player
         is_fighting.children.push fsee, search_player
 

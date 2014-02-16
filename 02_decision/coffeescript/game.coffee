@@ -65,6 +65,7 @@
                     @map.set_tile_explored posx, posy
 
         @players.push p
+        @scope.new_event "primary", p.name + " has been spawned"
         @map.add_game_object p
 
     spawn_powerup: () ->
@@ -92,7 +93,7 @@
         ind = $.inArray(pl, @players)
         @map.remove_game_object pl
         @players.splice(ind, 1)
-        @scope.new_event "warning", pl.name + " died"
+        @scope.new_event "danger", pl.name + " died"
 
         @spawn_new_player()
 

@@ -49,7 +49,8 @@
         @seeable_objects = new Array
         @active_bonuses = new Array
 
-        @attack_target = null
+        # @attack_target = null
+        @retreat_tile = null
 
     set_state: (state) ->
         @state = state
@@ -171,8 +172,28 @@
         console.log @name + ": got injured for " + dmg
         @health -= dmg
 
+    can_flee: ->
+        # Get adjacent tiles and see, if there is a way to retreat
+        map = g.get_map()
+        tiles = map.get_adjacent_tiles @posx, @posy
+
+        console.log "Can flee?"
+        console.log tiles
+        for t in tiles
+            if t.is_walkable()
+                @retreat_tile = t
+                console.log "Retreat tile: ", @retreat_tile
+                return true
+        false
+
     flee: ->
-        1
+        @state = PSTATE_FLEE
+        console.log @name, "Fleeing"
+        nx = @retreat_tile.posx - @posx
+        ny = @retreat_tile.posy - @posy
+        @move nx, ny
+
+
     # --- Explore nearby surroundings
     pick_random_tile: ->
         good = false
