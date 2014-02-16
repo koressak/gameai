@@ -20,14 +20,33 @@
         <br>
         <br>
         <div class="row">
-            <div class="col-md-4">
-                <div ng-repeat="player in players" class="panel panel-default">
+            <div class="col-md-12">
+                <div ng-repeat="player in players" class="panel panel-default player-stats">
                     <div class="panel-heading">{{player.name}}</div>
                     <div class="panel-body">
-                        <p>Health: <span class="badge">{{player.health}}</span><br>
-                        Score: <span class="badge">{{player.score}}</span></p>
+                        <p>
+                            Health: <span class="badge">{{player.health}}</span><br>
+                            Speed: <span class="badge">{{player.speed}}</span>
+                            Damage: <span class="badge">{{player.damage}}</span>
+                            Score: <span class="badge">{{player.score}}</span>
+                        </p>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+        <div class="panel panel-warning">
+            <div class="panel-heading">Game Log</div>
+            <div class="panel-body">
+                <ul class="game-log">
+                    <li ng-repeat="item in game_log">
+                        <span class="label label-{{item.status}}">&nbsp;</span>
+                        {{item.text}}
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -65,7 +84,7 @@
                         <strong>Speed bonus</strong> - +1 action per frame step, 5 frame steps timeout.
                     </li>
                     <li>
-                        <strong>Damage bonus</strong> - +5 damage points, 5 attacks timeout.
+                        <strong>Damage bonus</strong> - +5 damage points.
                     </li>
                 </ul>
             </div>

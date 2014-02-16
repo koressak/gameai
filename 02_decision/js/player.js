@@ -16,6 +16,12 @@
 
   this.PSTATE_ATTACK = 1;
 
+  this.PSTATE_FLEE = 2;
+
+  this.MAX_HEALTH = 100;
+
+  this.CRITICAL_HEALTH = 25;
+
   this.Player = _Player = (function(_super) {
     __extends(_Player, _super);
 
@@ -28,15 +34,14 @@
       var dbuilder, i, u, _i, _j, _ref1, _ref2;
       this.image = 'images/soldier.png';
       this.load_image();
-      this.score = 0;
       dbuilder = new DecisionBuilder;
       this.decision = dbuilder.generate_tree();
       this.name = '';
-      this.health = 100;
+      this.health = MAX_HEALTH;
       this.damage = 5;
       this.speed = 1;
-      this.sight_radius = 2;
-      this.direction = SIGHT_LEFT;
+      this.sight_radius = 1;
+      this.score = 0;
       this.map = g.get_map();
       this.explored_tiles = new Array(this.map.width);
       for (i = _i = 0, _ref1 = this.map.width - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
@@ -50,7 +55,8 @@
       this.current_goal = null;
       this.current_path = null;
       this.seeable_objects = new Array;
-      return this.active_bonuses = new Array;
+      this.active_bonuses = new Array;
+      return this.attack_target = null;
     };
 
     _Player.prototype.set_state = function(state) {
@@ -131,27 +137,76 @@
     _Player.prototype.is_object_consumable = function() {
       var obj;
       obj = this.seeable_objects[0];
+      console.log('Is consumable');
+      console.log(obj instanceof PowerUp);
       return obj instanceof PowerUp;
     };
 
-    _Player.prototype.pick_random_unexplored_tile = function() {
+    _Player.prototype.is_object_player = function() {
+      var obj;
+      obj = this.seeable_objects[0];
+      console.log('Is Player');
+      console.log(obj instanceof Player);
+      return obj instanceof Player;
+    };
+
+    _Player.prototype.is_fighting = function() {
+      return this.state === PSTATE_ATTACK;
+    };
+
+    _Player.prototype.can_attack = function() {
+      if (this.health > CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
+    _Player.prototype.is_health_good = function() {
+      if (this.health > CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
+    _Player.prototype.attack = function() {
+      var obj;
+      this.state = PSTATE_ATTACK;
+      obj = this.seeable_objects[0];
+      console.log(this.name + ": attacking");
+      console.log("Inflicting damage: " + this.damage);
+      obj.get_damaged(this.damage);
+      if (obj.health <= 0) {
+        this.score += 1;
+        return g.player_death(obj);
+      }
+    };
+
+    _Player.prototype.get_damaged = function(dmg) {
+      console.log(this.name + ": got injured for " + dmg);
+      return this.health -= dmg;
+    };
+
+    _Player.prototype.flee = function() {
+      return 1;
+    };
+
+    _Player.prototype.pick_random_tile = function() {
       var good, x, y;
       good = false;
       while (!good) {
         x = get_random_int(0, this.map.width - 1);
         y = get_random_int(0, this.map.height - 1);
-        if (!this.explored_tiles[x][y]) {
-          if (this.map.is_tile_walkable(x, y)) {
-            return [x, y];
-          }
+        if (this.map.is_tile_walkable(x, y)) {
+          return [x, y];
         }
       }
     };
 
-    _Player.prototype.explore = function() {
+    _Player.prototype.search_player = function() {
       var nx, ny, tile, x, y, _ref1, _ref2;
+      this.state = PSTATE_EXPLORE;
       if (this.current_path === null) {
-        _ref1 = this.pick_random_unexplored_tile(), x = _ref1[0], y = _ref1[1];
+        _ref1 = this.pick_random_tile(), x = _ref1[0], y = _ref1[1];
         tile = this.map.tiles[x][y];
         this.current_path = this.find_path_to_target(tile);
         if (!this.current_path) {
@@ -165,7 +220,9 @@
     _Player.prototype.consume_object = function() {
       var obj;
       obj = this.seeable_objects.splice(0, 1)[0];
+      obj.pre_consume(this);
       obj.consume(this);
+      obj.post_consume(this);
       return this.move(obj.posx - this.posx, obj.posy - this.posy);
     };
 

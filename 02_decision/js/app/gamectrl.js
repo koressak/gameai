@@ -7,13 +7,13 @@
   controllers.controller('GameCtrl', [
     '$scope', '$rootScope', '$location', '$anchorScroll', function($scope, $rootScope, $location, $anchorScroll) {
       var el;
-      window.board_width = 630;
-      window.board_height = 630;
-      window.tile_no_x = 21;
-      window.tile_no_y = 21;
+      window.board_width = 300;
+      window.board_height = 300;
+      window.tile_no_x = 10;
+      window.tile_no_y = 10;
       window.tile_width = 30;
       window.tile_height = 30;
-      window.rock_count = 100;
+      window.rock_count = 10;
       window.frame_step = 300;
       window.powerup_spawn_percent = 15;
       window.max_players = 5;
@@ -21,18 +21,16 @@
       $scope.is_game_running = false;
       $scope.game_loaded = false;
       $scope.players = null;
-      el = document.getElementById('gamecanvas');
-      window.pinst = new Processing(el, window.sketchProcess);
-      window.g = new window.Game;
-      window.g.init_game($scope);
-      pinst.noLoop();
+      $scope.game_log = new Array;
       $scope.toggle_game = function() {
         if ($scope.is_game_running) {
           console.log("Stopping game");
           pinst.noLoop();
-          return $scope.is_game_running = false;
+          $scope.is_game_running = false;
+          return $scope.new_event("danger", "Game stopped");
         } else {
           console.log("Starting game");
+          $scope.new_event("success", "Game started");
           pinst.loop();
           $scope.game_loaded = true;
           return $scope.is_game_running = true;
@@ -42,10 +40,21 @@
         $scope.players = g.players;
         return $scope.$apply();
       };
-      return $scope.scroll_to = function(id) {
+      $scope.scroll_to = function(id) {
         $location.hash(id);
         return $anchorScroll();
       };
+      $scope.new_event = function(status, msg) {
+        return $scope.game_log.unshift({
+          status: status,
+          text: msg
+        });
+      };
+      el = document.getElementById('gamecanvas');
+      window.pinst = new Processing(el, window.sketchProcess);
+      window.g = new window.Game;
+      window.g.init_game($scope);
+      return pinst.noLoop();
     }
   ]);
 

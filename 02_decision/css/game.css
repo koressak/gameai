@@ -6,3 +6,12 @@
   height: 115px;
   display: block;
 }
+div.player-stats {
+  width: 120px;
+  margin-right: 10px;
+  float: left;
+}
+ul.game-log {
+  list-style: none;
+  padding: 0;
+}

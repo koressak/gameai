@@ -10,6 +10,7 @@
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
       this.scope = scope;
+      this.player_counter = 0;
       this.last_move_time = new Date;
       this.players = new Array;
       this.spawn_new_player();
@@ -53,7 +54,7 @@
       }
       p = new Player;
       p.init();
-      p.name = 'Player ' + (this.players.length + 1);
+      p.name = 'Player ' + (this.player_counter++);
       good = false;
       while (!good) {
         posx = get_random_int(0, this.map.width - 1);
@@ -93,6 +94,15 @@
         }
       }
       return p.add_to_game();
+    };
+
+    _Class.prototype.player_death = function(pl) {
+      var ind;
+      ind = $.inArray(pl, this.players);
+      this.map.remove_game_object(pl);
+      this.players.splice(ind, 1);
+      this.scope.new_event("warning", pl.name + " died");
+      return this.spawn_new_player();
     };
 
     return _Class;

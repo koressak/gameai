@@ -24,6 +24,14 @@
       return this.remove_from_game();
     };
 
+    _PowerUp.prototype.pre_consume = function(player) {
+      return 1;
+    };
+
+    _PowerUp.prototype.post_consume = function(player) {
+      return 1;
+    };
+
     _PowerUp.prototype.do_timeout = function() {
       return true;
     };
@@ -42,7 +50,7 @@
 
     _SpeedPowerUp.prototype.init = function() {
       this.bonus = 1;
-      this.timeout = 3;
+      this.timeout = 5;
       this.type = 'speed';
       this.image = 'images/powerups/speed.png';
       return this.load_image();
@@ -78,6 +86,12 @@
       this.type = 'health';
       this.image = 'images/powerups/health.png';
       return this.load_image();
+    };
+
+    _HealthPowerUp.prototype.post_consume = function(player) {
+      if (player[this.type] > MAX_HEALTH) {
+        return player[this.type] = MAX_HEALTH;
+      }
     };
 
     return _HealthPowerUp;

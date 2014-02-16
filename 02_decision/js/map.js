@@ -15,7 +15,7 @@
       this.posx = x;
       this.posy = y;
       this.object = null;
-      this.explored = false;
+      this.explored = true;
       return this.unexplored_image = null;
     };
 
@@ -162,16 +162,16 @@
     _Class.prototype.get_adjacent_tiles = function(x, y) {
       var tiles;
       tiles = new Array;
-      if (x - 1 >= 0 && this.is_tile_walkable(x - 1, y)) {
+      if (x - 1 >= 0) {
         tiles.push(this.tiles[x - 1][y]);
       }
-      if (x + 1 <= this.width - 1 && this.is_tile_walkable(x + 1, y)) {
+      if (x + 1 <= this.width - 1) {
         tiles.push(this.tiles[x + 1][y]);
       }
-      if (y - 1 >= 0 && this.is_tile_walkable(x, y - 1)) {
+      if (y - 1 >= 0) {
         tiles.push(this.tiles[x][y - 1]);
       }
-      if (y + 1 <= this.height - 1 && this.is_tile_walkable(x, y + 1)) {
+      if (y + 1 <= this.height - 1) {
         tiles.push(this.tiles[x][y + 1]);
       }
       return tiles;

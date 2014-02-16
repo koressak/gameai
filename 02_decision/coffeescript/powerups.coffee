@@ -9,6 +9,12 @@
         console.log "Removing powerup from game", @
         @remove_from_game()
 
+    pre_consume: (player) ->
+        1
+
+    post_consume: (player) ->
+        1 
+
     do_timeout: ->
         true
 
@@ -16,7 +22,7 @@
 @SpeedPowerUp = class _SpeedPowerUp extends @PowerUp
     init: ->
         @bonus = 1  # amount of bonus
-        @timeout = 3  # Timeout for 20 frame steps 
+        @timeout = 5  # Timeout frame steps 
         @type = 'speed'
         @image = 'images/powerups/speed.png'
         @load_image()
@@ -40,5 +46,8 @@
         @image = 'images/powerups/health.png'
         @load_image()
 
+    post_consume: (player) ->
+        if player[@type] > MAX_HEALTH
+            player[@type] = MAX_HEALTH
 
  

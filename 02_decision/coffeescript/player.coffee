@@ -5,12 +5,16 @@
 
 @PSTATE_EXPLORE = 0
 @PSTATE_ATTACK = 1
+@PSTATE_FLEE = 2
+
+@MAX_HEALTH = 100
+@CRITICAL_HEALTH = 25
+
 
 @Player = class _Player extends @MovableGameObject
     init: ->
         @image = 'images/soldier.png'
         @load_image()
-        @score = 0
 
 
         dbuilder = new DecisionBuilder
@@ -18,11 +22,12 @@
         # console.log @decision
 
         @name = ''
-        @health = 100
+        @health = MAX_HEALTH
         @damage = 5
         @speed = 1
-        @sight_radius = 2
-        @direction = SIGHT_LEFT
+        @sight_radius = 1
+        @score = 0
+        # @direction = SIGHT_LEFT
 
         # Save game map
         @map = g.get_map()
@@ -44,23 +49,12 @@
         @seeable_objects = new Array
         @active_bonuses = new Array
 
+        @attack_target = null
+
     set_state: (state) ->
         @state = state
 
     get_next_move: () ->
-
-        # g = window.g
-
-        # if @current_target != null
-
-        #     ind = $.inArray(@current_target, g.targets)
-        #     if ind == -1
-        #         t = g.get_random_target()
-        #         @clear_current_goal()
-        #         @set_target t
-
-        #     if @current_path == null
-        #         @current_path = @find_path_to_target @current_target
 
         step = @current_path.splice(0,1)
         if step.length > 0
@@ -131,28 +125,72 @@
         # If the seeable object is consumable (powerup)
         # For starters - we pick just the first one we see
         obj = @seeable_objects[0]
-        # console.log 'Is consumable'
+        console.log 'Is consumable'
         # console.log obj
-        # console.log obj instanceof PowerUp
+        console.log obj instanceof PowerUp
         obj instanceof PowerUp
 
+    is_object_player: ->
+        obj = @seeable_objects[0]
+        console.log 'Is Player'
+        # console.log obj
+        console.log obj instanceof Player
+        obj instanceof Player
 
+    # --- Attack and flee
+    is_fighting: ->
+        @state == PSTATE_ATTACK
+
+    can_attack: ->
+        # Player can attack if his health is above critical
+        if @health > CRITICAL_HEALTH
+            return true
+        false
+
+    is_health_good: ->
+        # TODO: measure intensity of loosing healh in a fight
+        if @health > CRITICAL_HEALTH
+            return true
+        false
+
+    attack: ->
+        @state = PSTATE_ATTACK
+
+        obj = @seeable_objects[0]
+        console.log @name + ": attacking"
+        console.log "Inflicting damage: " + @damage
+        obj.get_damaged @damage
+
+        if obj.health <= 0
+            # increment score
+            @score += 1
+            # remove object from game
+            g.player_death obj
+
+    get_damaged: (dmg) ->
+        console.log @name + ": got injured for " + dmg
+        @health -= dmg
+
+    flee: ->
+        1
     # --- Explore nearby surroundings
-    pick_random_unexplored_tile: ->
+    pick_random_tile: ->
         good = false
         # TODO: have to protect against all tiles explored
         while not good
             x = get_random_int 0, @map.width-1
             y = get_random_int 0, @map.height-1
-            if not @explored_tiles[x][y]
-                if @map.is_tile_walkable x, y
-                    return [x, y]
+            # if not @explored_tiles[x][y]
+            if @map.is_tile_walkable x, y
+                return [x, y]
 
 
-    explore: ->
-        # Pick random unexplored tile if not already done
+    search_player: ->
+        # Pick random tile to search for the player
+        @state = PSTATE_EXPLORE
+
         if @current_path == null
-            [x, y] = @pick_random_unexplored_tile()
+            [x, y] = @pick_random_tile()
             # console.log "New target"
             # console.log x, y
             tile = @map.tiles[x][y]
@@ -172,7 +210,9 @@
         obj = @seeable_objects.splice(0,1)[0]
 
         # consume it's power
+        obj.pre_consume @
         obj.consume @
+        obj.post_consume @
         # move to it's place
         @move obj.posx-@posx, obj.posy-@posy
 

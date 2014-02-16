@@ -40,6 +40,8 @@
             connections = map.get_adjacent_tiles current.node.posx, current.node.posy
 
             for i in [0..connections.length-1]
+                unless connections[i].is_walkable()
+                    continue
                 node = @get_to_node connections[i]
                 node_cost = current.cost_so_far + 1  # +1 - connection is length of 1
                 node_estimate = @estimate_cost node.node.posx, node.node.posy, @end.posx, @end.posy

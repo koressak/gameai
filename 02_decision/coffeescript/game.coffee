@@ -10,14 +10,13 @@
         @mrender = new window.MapRenderer
         @map = @mrender.render tile_no_x, tile_no_y
         @scope = scope
+        @player_counter = 0
 
         @last_move_time = new Date
         @players = new Array
 
         @spawn_new_player()
         @spawn_new_player()
-        # @update_ui()
-        # @scope.update_ui()
 
 
     get_player: (x) ->
@@ -54,7 +53,7 @@
 
         p = new Player
         p.init()
-        p.name = 'Player ' + (@players.length+1)
+        p.name = 'Player ' + (@player_counter++)
         good = false
         while not good
             posx = get_random_int 0, @map.width-1
@@ -88,4 +87,12 @@
                         p.set_position posx, posy
 
         p.add_to_game()
+
+    player_death: (pl) ->
+        ind = $.inArray(pl, @players)
+        @map.remove_game_object pl
+        @players.splice(ind, 1)
+        @scope.new_event "warning", pl.name + " died"
+
+        @spawn_new_player()
 

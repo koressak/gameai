@@ -6,8 +6,7 @@
     init: ->
         @action = null 
         @condition = null
-        @left = null
-        @right = null
+        @children = new Array
 
     set_action: (action) ->
         @action = action
@@ -25,14 +24,19 @@
         # Decide where to go next or null
 
         # We have nowhere else to go, returning
-        if @left == null && @right == null
+        # if @left == null && @right == null
+        if @children.length == 0
             return null
 
-        if @left.compare_conditions player
-            return @left
+        for child in @children
+            if child.compare_conditions player
+                return child
 
-        if @right.compare_conditions player
-            return @right
+        # if @left.compare_conditions player
+        #     return @left
+
+        # if @right.compare_conditions player
+        #     return @right
 
         null
 
@@ -80,18 +84,41 @@
         # Create the tree to cover all the actions
         root = @gen_new_node null, null
 
-        explore = @gen_always_true 'explore'
+        # fight
+        is_fighting = @gen_new_node 'is_fighting', null
+        is_health_good = @gen_new_node 'is_health_good', 'attack'
+        attack = @gen_always_true 'attack'
+        flee = @gen_always_true 'flee'
+        fsee_player = @gen_new_node 'is_object_player', null
+        fsee = @gen_new_node 'can_see_object', null
+
+        # Exploring
+        search_player = @gen_always_true 'search_player'
 
         # what to do when see an object
         see_powerup = @gen_new_node 'is_object_consumable', 'consume_object'
+        see_player = @gen_new_node 'is_object_player', null
         see = @gen_new_node 'can_see_object', null
 
-        see.left = see_powerup
-        see.right = explore
 
-        root.left = see
-        root.right = explore
+        can_attack = @gen_new_node 'can_attack', 'attack'
 
+
+        # --- Connection of the tree
+        see_player.children.push can_attack, flee
+        see.children.push see_player, see_powerup
+
+        # Fighting subtree
+        is_health_good.children.push attack, flee
+
+        # is_fighting
+        fsee_player.children.push is_health_good, flee
+        fsee.children.push fsee_player, search_player
+        is_fighting.children.push fsee, search_player
+
+        # Set first root action
+        # root.children.push is_fighting, see, explore
+        root.children.push is_fighting, see, search_player
 
         # Finally create a tree object
         tree = new DecisionTree
