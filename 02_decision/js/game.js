@@ -5,14 +5,20 @@
       console.log("Initialization of Game");
     }
 
-    _Class.prototype.init_game = function() {
+    _Class.prototype.init_game = function(scope) {
+      var i, _i, _ref, _results;
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
+      this.scope = scope;
+      this.player_counter = 0;
       this.last_move_time = new Date;
       this.players = new Array;
-      this.spawn_new_player();
-      return this.update_ui();
+      _results = [];
+      for (i = _i = 0, _ref = max_players - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.spawn_new_player());
+      }
+      return _results;
     };
 
     _Class.prototype.get_player = function(x) {
@@ -29,20 +35,30 @@
 
     _Class.prototype.game_loop = function() {
       var delta, i, ind, now, p, _i, _ref;
+      if (this.game_finished) {
+        return true;
+      }
       now = new Date;
       delta = now - this.last_move_time;
       if (delta > frame_step) {
         this.last_move_time = now;
         for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           p = this.players[i];
-          p.do_action();
+          if (p.state !== PSTATE_DEATH) {
+            p.do_action();
+          } else {
+            p.respawn_timeout -= 1;
+            if (p.respawn_timeout <= 0) {
+              this.respawn_player(p);
+            }
+          }
         }
         ind = Math.floor(Math.random() * 100);
         if (ind <= powerup_spawn_percent) {
           this.spawn_powerup();
         }
+        return this.scope.update_ui();
       }
-      return this.update_ui();
     };
 
     _Class.prototype.spawn_new_player = function() {
@@ -52,6 +68,8 @@
       }
       p = new Player;
       p.init();
+      p.number = this.player_counter;
+      p.name = 'Player ' + (this.player_counter++);
       good = false;
       while (!good) {
         posx = get_random_int(0, this.map.width - 1);
@@ -60,19 +78,41 @@
           if (this.map.is_tile_free(posx, posy)) {
             good = true;
             p.set_position(posx, posy);
-            this.map.set_tile_explored(posx, posy);
           }
         }
       }
       this.players.push(p);
+      this.scope.new_event("primary", p.name + " has been spawned");
       return this.map.add_game_object(p);
+    };
+
+    _Class.prototype.respawn_player = function(pl) {
+      var good, posx, posy;
+      pl.set_initial_state();
+      good = false;
+      while (!good) {
+        posx = get_random_int(0, this.map.width - 1);
+        posy = get_random_int(0, this.map.height - 1);
+        if (this.map.is_tile_walkable(posx, posy)) {
+          if (this.map.is_tile_free(posx, posy)) {
+            good = true;
+            pl.set_position(posx, posy);
+          }
+        }
+      }
+      this.scope.new_event("default", pl.name + " has been respawned");
+      return this.map.add_game_object(pl);
     };
 
     _Class.prototype.spawn_powerup = function() {
       var good, p, posx, posy, type;
-      type = get_random_int(0, 1);
+      type = get_random_int(0, 3);
       if (type === 0) {
         p = new HealthPowerUp;
+      } else if (type === 1) {
+        p = new FirepowerPowerUp;
+      } else if (type === 2) {
+        p = new ArmorPowerUp;
       } else {
         p = new SpeedPowerUp;
       }
@@ -93,19 +133,20 @@
       return p.add_to_game();
     };
 
-    _Class.prototype.update_ui = function() {
-      var i, p, _i, _ref, _results;
-      stats.html("");
-      _results = [];
-      for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        p = this.players[i];
-        stats.append("<p><strong>Player " + (i + 1) + "</strong><br>");
-        stats.append("Score: " + p.score + "<br>");
-        stats.append("Health: " + p.health + "<br>");
-        stats.append("Speed: " + p.speed + "<br>");
-        _results.push(stats.append("</p><br>"));
-      }
-      return _results;
+    _Class.prototype.player_death = function(pl) {
+      var ind;
+      ind = $.inArray(pl, this.players);
+      this.map.remove_game_object(pl);
+      this.scope.new_event("danger", pl.name + " died");
+      pl.state = PSTATE_DEATH;
+      pl.respawn_timeout = get_random_int(10, 20);
+      return this.scope.new_event("default", pl.name + " will respawn in " + pl.respawn_timeout);
+    };
+
+    _Class.prototype.player_won = function(pl) {
+      this.game_finished = true;
+      this.scope.new_event("success", pl.name + " has won the game!!!");
+      return this.scope.is_game_running = false;
     };
 
     return _Class;

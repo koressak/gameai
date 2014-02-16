@@ -43,6 +43,9 @@
         }
         connections = map.get_adjacent_tiles(current.node.posx, current.node.posy);
         for (i = _i = 0, _ref = connections.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+          if (!connections[i].is_walkable()) {
+            continue;
+          }
           node = this.get_to_node(connections[i]);
           node_cost = current.cost_so_far + 1;
           node_estimate = this.estimate_cost(node.node.posx, node.node.posy, this.end.posx, this.end.posy);

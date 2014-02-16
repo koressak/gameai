@@ -12,9 +12,17 @@
 
   this.SIGHT_LEFT = 3;
 
+  this.PSTATE_DEATH = -1;
+
   this.PSTATE_EXPLORE = 0;
 
   this.PSTATE_ATTACK = 1;
+
+  this.PSTATE_FLEE = 2;
+
+  this.MAX_HEALTH = 100;
+
+  this.CRITICAL_HEALTH = 25;
 
   this.Player = _Player = (function(_super) {
     __extends(_Player, _super);
@@ -28,14 +36,13 @@
       var dbuilder, i, u, _i, _j, _ref1, _ref2;
       this.image = 'images/soldier.png';
       this.load_image();
-      this.score = 0;
       dbuilder = new DecisionBuilder;
       this.decision = dbuilder.generate_tree();
-      this.health = 100;
-      this.damage = 5;
-      this.speed = 1;
-      this.sight_radius = 2;
-      this.direction = SIGHT_LEFT;
+      this.name = '';
+      this.number = -1;
+      this.score = 0;
+      this.sight_radius = 1;
+      this.respawn_timeout = 0;
       this.map = g.get_map();
       this.explored_tiles = new Array(this.map.width);
       for (i = _i = 0, _ref1 = this.map.width - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
@@ -44,12 +51,21 @@
           this.explored_tiles[i][u] = false;
         }
       }
+      return this.set_initial_state();
+    };
+
+    _Player.prototype.set_initial_state = function() {
+      this.health = MAX_HEALTH;
+      this.armor = 0;
+      this.damage = 5;
+      this.speed = 1;
       this.state = PSTATE_EXPLORE;
       this.current_action = null;
       this.current_goal = null;
       this.current_path = null;
       this.seeable_objects = new Array;
-      return this.active_bonuses = new Array;
+      this.active_bonuses = new Array;
+      return this.retreat_tile = null;
     };
 
     _Player.prototype.set_state = function(state) {
@@ -133,24 +149,94 @@
       return obj instanceof PowerUp;
     };
 
-    _Player.prototype.pick_random_unexplored_tile = function() {
+    _Player.prototype.is_object_player = function() {
+      var obj;
+      obj = this.seeable_objects[0];
+      return obj instanceof Player;
+    };
+
+    _Player.prototype.is_fighting = function() {
+      return this.state === PSTATE_ATTACK;
+    };
+
+    _Player.prototype.can_attack = function() {
+      if (this.health > CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
+    _Player.prototype.is_health_good = function() {
+      if (this.health > CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
+    _Player.prototype.attack = function() {
+      var obj;
+      this.state = PSTATE_ATTACK;
+      obj = this.seeable_objects[0];
+      obj.get_damaged(this.damage);
+      if (obj.health <= 0) {
+        this.score += 1;
+        g.player_death(obj);
+        if (this.score === winning_score) {
+          return g.player_won(this);
+        }
+      }
+    };
+
+    _Player.prototype.get_damaged = function(dmg) {
+      var res;
+      if (dmg > this.armor) {
+        res = Math.abs(this.armor - dmg);
+        this.armor = 0;
+        return this.health -= res;
+      } else {
+        return this.armor -= dmg;
+      }
+    };
+
+    _Player.prototype.can_flee = function() {
+      var map, t, tiles, _i, _len;
+      map = g.get_map();
+      tiles = map.get_adjacent_tiles(this.posx, this.posy);
+      for (_i = 0, _len = tiles.length; _i < _len; _i++) {
+        t = tiles[_i];
+        if (t.is_walkable()) {
+          this.retreat_tile = t;
+          return true;
+        }
+      }
+      return false;
+    };
+
+    _Player.prototype.flee = function() {
+      var nx, ny;
+      this.state = PSTATE_FLEE;
+      nx = this.retreat_tile.posx - this.posx;
+      ny = this.retreat_tile.posy - this.posy;
+      return this.move(nx, ny);
+    };
+
+    _Player.prototype.pick_random_tile = function() {
       var good, x, y;
       good = false;
       while (!good) {
         x = get_random_int(0, this.map.width - 1);
         y = get_random_int(0, this.map.height - 1);
-        if (!this.explored_tiles[x][y]) {
-          if (this.map.is_tile_walkable(x, y)) {
-            return [x, y];
-          }
+        if (this.map.is_tile_walkable(x, y)) {
+          return [x, y];
         }
       }
     };
 
-    _Player.prototype.explore = function() {
+    _Player.prototype.search_player = function() {
       var nx, ny, tile, x, y, _ref1, _ref2;
+      this.state = PSTATE_EXPLORE;
       if (this.current_path === null) {
-        _ref1 = this.pick_random_unexplored_tile(), x = _ref1[0], y = _ref1[1];
+        _ref1 = this.pick_random_tile(), x = _ref1[0], y = _ref1[1];
         tile = this.map.tiles[x][y];
         this.current_path = this.find_path_to_target(tile);
         if (!this.current_path) {
@@ -164,7 +250,9 @@
     _Player.prototype.consume_object = function() {
       var obj;
       obj = this.seeable_objects.splice(0, 1)[0];
+      obj.pre_consume(this);
       obj.consume(this);
+      obj.post_consume(this);
       return this.move(obj.posx - this.posx, obj.posy - this.posy);
     };
 

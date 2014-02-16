@@ -11,6 +11,8 @@
       this.image = '';
       this.img = null;
       this.speed = 0;
+      this.pr = pinst;
+      this.font = this.pr.loadFont('Arial');
     }
 
     _Class.prototype.set_position = function(x, y) {
@@ -42,7 +44,11 @@
       var x, y;
       x = this.posx * window.tile_width;
       y = this.posy * window.tile_height;
-      return pinst.image(this.img, x, y, window.tile_width, window.tile_height);
+      this.pr.image(this.img, x, y, window.tile_width, window.tile_height);
+      if (this instanceof Player) {
+        this.pr.textFont(this.font, 10);
+        return this.pr.text(this.number, x + 12, y);
+      }
     };
 
     return _Class;

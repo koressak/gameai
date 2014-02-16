@@ -3,25 +3,31 @@
 @SIGHT_DOWN = 2
 @SIGHT_LEFT = 3
 
+@PSTATE_DEATH = -1
 @PSTATE_EXPLORE = 0
 @PSTATE_ATTACK = 1
+@PSTATE_FLEE = 2
+
+@MAX_HEALTH = 100
+@CRITICAL_HEALTH = 25
+
 
 @Player = class _Player extends @MovableGameObject
     init: ->
         @image = 'images/soldier.png'
         @load_image()
-        @score = 0
-
 
         dbuilder = new DecisionBuilder
         @decision = dbuilder.generate_tree()
         # console.log @decision
 
-        @health = 100
-        @damage = 5
-        @speed = 1
-        @sight_radius = 2
-        @direction = SIGHT_LEFT
+        @name = ''
+        @number = -1
+        @score = 0
+        @sight_radius = 1
+
+        # When dies, respawn in framesteps
+        @respawn_timeout = 0
 
         # Save game map
         @map = g.get_map()
@@ -33,7 +39,15 @@
             for u in [0..@map.height-1]
                 @explored_tiles[i][u] = false
 
-        # console.log @explored_tiles
+        @set_initial_state()
+
+    set_initial_state: ->
+        # Initial state
+        @health = MAX_HEALTH
+        @armor = 0
+        @damage = 5
+        @speed = 1
+        # @direction = SIGHT_LEFT
 
         # Decision variables
         @state = PSTATE_EXPLORE
@@ -43,23 +57,13 @@
         @seeable_objects = new Array
         @active_bonuses = new Array
 
+        # @attack_target = null
+        @retreat_tile = null
+
     set_state: (state) ->
         @state = state
 
     get_next_move: () ->
-
-        # g = window.g
-
-        # if @current_target != null
-
-        #     ind = $.inArray(@current_target, g.targets)
-        #     if ind == -1
-        #         t = g.get_random_target()
-        #         @clear_current_goal()
-        #         @set_target t
-
-        #     if @current_path == null
-        #         @current_path = @find_path_to_target @current_target
 
         step = @current_path.splice(0,1)
         if step.length > 0
@@ -135,23 +139,96 @@
         # console.log obj instanceof PowerUp
         obj instanceof PowerUp
 
+    is_object_player: ->
+        obj = @seeable_objects[0]
+        # console.log 'Is Player'
+        # console.log obj
+        # console.log obj instanceof Player
+        obj instanceof Player
+
+    # --- Attack and flee
+    is_fighting: ->
+        @state == PSTATE_ATTACK
+
+    can_attack: ->
+        # Player can attack if his health is above critical
+        if @health > CRITICAL_HEALTH
+            return true
+        false
+
+    is_health_good: ->
+        # TODO: measure intensity of loosing healh in a fight
+        if @health > CRITICAL_HEALTH
+            return true
+        false
+
+    attack: ->
+        @state = PSTATE_ATTACK
+
+        obj = @seeable_objects[0]
+        # console.log @name + ": attacking"
+        # console.log "Inflicting damage: " + @damage
+        obj.get_damaged @damage
+
+        if obj.health <= 0
+            # increment score
+            @score += 1
+            # remove object from game
+            g.player_death obj
+
+            if @score == winning_score
+                g.player_won @
+
+
+    get_damaged: (dmg) ->
+        # console.log @name + ": got injured for " + dmg
+        if dmg > @armor
+            res = Math.abs @armor-dmg
+            @armor = 0
+            @health -= res
+        else
+            @armor -= dmg
+
+    can_flee: ->
+        # Get adjacent tiles and see, if there is a way to retreat
+        map = g.get_map()
+        tiles = map.get_adjacent_tiles @posx, @posy
+
+        # console.log "Can flee?"
+        # console.log tiles
+        for t in tiles
+            if t.is_walkable()
+                @retreat_tile = t
+                # console.log "Retreat tile: ", @retreat_tile
+                return true
+        false
+
+    flee: ->
+        @state = PSTATE_FLEE
+        # console.log @name, "Fleeing"
+        nx = @retreat_tile.posx - @posx
+        ny = @retreat_tile.posy - @posy
+        @move nx, ny
+
 
     # --- Explore nearby surroundings
-    pick_random_unexplored_tile: ->
+    pick_random_tile: ->
         good = false
         # TODO: have to protect against all tiles explored
         while not good
             x = get_random_int 0, @map.width-1
             y = get_random_int 0, @map.height-1
-            if not @explored_tiles[x][y]
-                if @map.is_tile_walkable x, y
-                    return [x, y]
+            # if not @explored_tiles[x][y]
+            if @map.is_tile_walkable x, y
+                return [x, y]
 
 
-    explore: ->
-        # Pick random unexplored tile if not already done
+    search_player: ->
+        # Pick random tile to search for the player
+        @state = PSTATE_EXPLORE
+
         if @current_path == null
-            [x, y] = @pick_random_unexplored_tile()
+            [x, y] = @pick_random_tile()
             # console.log "New target"
             # console.log x, y
             tile = @map.tiles[x][y]
@@ -171,7 +248,9 @@
         obj = @seeable_objects.splice(0,1)[0]
 
         # consume it's power
+        obj.pre_consume @
         obj.consume @
+        obj.post_consume @
         # move to it's place
         @move obj.posx-@posx, obj.posy-@posy
 

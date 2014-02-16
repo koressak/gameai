@@ -8,7 +8,7 @@
         @posx = x
         @posy = y
         @object = null
-        @explored = false
+        @explored = true 
         @unexplored_image = null
 
     load_image: ->
@@ -37,6 +37,7 @@
 
         if @object != null 
             if @object instanceof Player
+                # console.log "Tile not walkable - Player is here"
                 return false
 
         true
@@ -79,6 +80,8 @@
         # Set tile explored if someone is moving to it
         @set_tile_explored nx, ny
         o = @tiles[ox][oy].remove_object()
+        # console.log "Moving game object"
+        # console.log o
         if o != null
             @tiles[nx][ny].set_object o
 
@@ -120,14 +123,23 @@
 
     get_adjacent_tiles: (x, y) ->
         tiles = new Array
-        if x-1 >= 0 and @is_tile_walkable x-1, y
+        # if x-1 >= 0 and @is_tile_walkable x-1, y
+        #     tiles.push @tiles[x-1][y]
+        # if x+1 <= @width-1 and @is_tile_walkable x+1, y
+        #     tiles.push @tiles[x+1][y]
+
+        # if y-1 >= 0 and @is_tile_walkable x, y-1
+        #     tiles.push @tiles[x][y-1]
+        # if y+1 <= @height-1 and @is_tile_walkable x, y+1
+        #     tiles.push @tiles[x][y+1]
+        if x-1 >= 0 
             tiles.push @tiles[x-1][y]
-        if x+1 <= @width-1 and @is_tile_walkable x+1, y
+        if x+1 <= @width-1
             tiles.push @tiles[x+1][y]
 
-        if y-1 >= 0 and @is_tile_walkable x, y-1
+        if y-1 >= 0
             tiles.push @tiles[x][y-1]
-        if y+1 <= @height-1 and @is_tile_walkable x, y+1
+        if y+1 <= @height-1
             tiles.push @tiles[x][y+1]
 
         return tiles
