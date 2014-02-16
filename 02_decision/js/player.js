@@ -12,6 +12,8 @@
 
   this.SIGHT_LEFT = 3;
 
+  this.PSTATE_DEATH = -1;
+
   this.PSTATE_EXPLORE = 0;
 
   this.PSTATE_ATTACK = 1;
@@ -37,12 +39,9 @@
       dbuilder = new DecisionBuilder;
       this.decision = dbuilder.generate_tree();
       this.name = '';
-      this.health = MAX_HEALTH;
-      this.armor = 0;
-      this.damage = 5;
-      this.speed = 1;
-      this.sight_radius = 1;
       this.score = 0;
+      this.sight_radius = 1;
+      this.respawn_timeout = 0;
       this.map = g.get_map();
       this.explored_tiles = new Array(this.map.width);
       for (i = _i = 0, _ref1 = this.map.width - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
@@ -51,6 +50,14 @@
           this.explored_tiles[i][u] = false;
         }
       }
+      return this.set_initial_state();
+    };
+
+    _Player.prototype.set_initial_state = function() {
+      this.health = MAX_HEALTH;
+      this.armor = 0;
+      this.damage = 5;
+      this.speed = 1;
       this.state = PSTATE_EXPLORE;
       this.current_action = null;
       this.current_goal = null;

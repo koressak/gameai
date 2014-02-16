@@ -17,8 +17,7 @@
       window.frame_step = 300;
       window.powerup_spawn_percent = 15;
       window.winning_score = 5;
-      window.max_players = 5;
-      window.max_targets = 5;
+      window.max_players = 2;
       $scope.is_game_running = false;
       $scope.game_loaded = false;
       $scope.winning_score = winning_score;

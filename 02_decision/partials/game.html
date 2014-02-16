@@ -11,6 +11,17 @@
 <div class="row">
     <div class="col-md-7">
         <canvas id="gamecanvas" width="640" height="480"></canvas>
+        <div class="panel panel-warning">
+            <div class="panel-heading"><strong>Game Log</strong></div>
+            <div class="panel-body">
+                <ul class="game-log">
+                    <li ng-repeat="item in game_log">
+                        <span class="label label-{{item.status}}">&nbsp;</span>
+                        {{item.text}}
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
     <div class="col-md-5">
         <h3>Game controls</h3>
@@ -40,17 +51,6 @@
 </div>
 <div class="row">
     <div class="col-md-8">
-        <div class="panel panel-warning">
-            <div class="panel-heading"><strong>Game Log</strong></div>
-            <div class="panel-body">
-                <ul class="game-log">
-                    <li ng-repeat="item in game_log">
-                        <span class="label label-{{item.status}}">&nbsp;</span>
-                        {{item.text}}
-                    </li>
-                </ul>
-            </div>
-        </div>
     </div>
 </div>
 <div class="row" id="description">

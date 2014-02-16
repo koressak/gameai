@@ -18,8 +18,8 @@ controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$ancho
 
     window.powerup_spawn_percent = 15
     window.winning_score = 5
-    window.max_players = 5
-    window.max_targets = 5
+    window.max_players = 2
+    # window.max_targets = 5
 
     $scope.is_game_running = false
     $scope.game_loaded = false

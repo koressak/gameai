@@ -3,6 +3,7 @@
 @SIGHT_DOWN = 2
 @SIGHT_LEFT = 3
 
+@PSTATE_DEATH = -1
 @PSTATE_EXPLORE = 0
 @PSTATE_ATTACK = 1
 @PSTATE_FLEE = 2
@@ -16,19 +17,16 @@
         @image = 'images/soldier.png'
         @load_image()
 
-
         dbuilder = new DecisionBuilder
         @decision = dbuilder.generate_tree()
         # console.log @decision
 
         @name = ''
-        @health = MAX_HEALTH
-        @armor = 0
-        @damage = 5
-        @speed = 1
-        @sight_radius = 1
         @score = 0
-        # @direction = SIGHT_LEFT
+        @sight_radius = 1
+
+        # When dies, respawn in framesteps
+        @respawn_timeout = 0
 
         # Save game map
         @map = g.get_map()
@@ -40,7 +38,15 @@
             for u in [0..@map.height-1]
                 @explored_tiles[i][u] = false
 
-        # console.log @explored_tiles
+        @set_initial_state()
+
+    set_initial_state: ->
+        # Initial state
+        @health = MAX_HEALTH
+        @armor = 0
+        @damage = 5
+        @speed = 1
+        # @direction = SIGHT_LEFT
 
         # Decision variables
         @state = PSTATE_EXPLORE

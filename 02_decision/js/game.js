@@ -6,6 +6,7 @@
     }
 
     _Class.prototype.init_game = function(scope) {
+      var i, _i, _ref, _results;
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
@@ -13,8 +14,11 @@
       this.player_counter = 0;
       this.last_move_time = new Date;
       this.players = new Array;
-      this.spawn_new_player();
-      return this.spawn_new_player();
+      _results = [];
+      for (i = _i = 0, _ref = max_players - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        _results.push(this.spawn_new_player());
+      }
+      return _results;
     };
 
     _Class.prototype.get_player = function(x) {
@@ -40,7 +44,14 @@
         this.last_move_time = now;
         for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
           p = this.players[i];
-          p.do_action();
+          if (p.state !== PSTATE_DEATH) {
+            p.do_action();
+          } else {
+            p.respawn_timeout -= 1;
+            if (p.respawn_timeout <= 0) {
+              this.respawn_player(p);
+            }
+          }
         }
         ind = Math.floor(Math.random() * 100);
         if (ind <= powerup_spawn_percent) {
@@ -66,13 +77,30 @@
           if (this.map.is_tile_free(posx, posy)) {
             good = true;
             p.set_position(posx, posy);
-            this.map.set_tile_explored(posx, posy);
           }
         }
       }
       this.players.push(p);
       this.scope.new_event("primary", p.name + " has been spawned");
       return this.map.add_game_object(p);
+    };
+
+    _Class.prototype.respawn_player = function(pl) {
+      var good, posx, posy;
+      pl.set_initial_state();
+      good = false;
+      while (!good) {
+        posx = get_random_int(0, this.map.width - 1);
+        posy = get_random_int(0, this.map.height - 1);
+        if (this.map.is_tile_walkable(posx, posy)) {
+          if (this.map.is_tile_free(posx, posy)) {
+            good = true;
+            pl.set_position(posx, posy);
+          }
+        }
+      }
+      this.scope.new_event("default", pl.name + " has been respawned");
+      return this.map.add_game_object(pl);
     };
 
     _Class.prototype.spawn_powerup = function() {
@@ -108,9 +136,9 @@
       var ind;
       ind = $.inArray(pl, this.players);
       this.map.remove_game_object(pl);
-      this.players.splice(ind, 1);
       this.scope.new_event("danger", pl.name + " died");
-      return this.spawn_new_player();
+      pl.state = PSTATE_DEATH;
+      return pl.respawn_timeout = get_random_int(10, 20);
     };
 
     _Class.prototype.player_won = function(pl) {

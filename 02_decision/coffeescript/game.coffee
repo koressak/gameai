@@ -15,9 +15,8 @@
         @last_move_time = new Date
         @players = new Array
 
-        @spawn_new_player()
-        @spawn_new_player()
-
+        for i in [0..max_players-1]
+            @spawn_new_player()
 
     get_player: (x) ->
         if x < @players.length
@@ -42,7 +41,12 @@
             @last_move_time = now
             for i in [0..@players.length-1]
                 p = @players[i] 
-                p.do_action()
+                unless p.state == PSTATE_DEATH
+                    p.do_action()
+                else
+                    p.respawn_timeout -= 1
+                    if p.respawn_timeout <= 0
+                        @respawn_player p
 
             ind = Math.floor(Math.random()*100)
             if ind <= powerup_spawn_percent
@@ -67,11 +71,26 @@
                 if @map.is_tile_free posx, posy
                     good = true
                     p.set_position posx, posy
-                    @map.set_tile_explored posx, posy
+                    # @map.set_tile_explored posx, posy
 
         @players.push p
         @scope.new_event "primary", p.name + " has been spawned"
         @map.add_game_object p
+
+    respawn_player: (pl) ->
+        pl.set_initial_state()
+        good = false
+        while not good
+            posx = get_random_int 0, @map.width-1
+            posy = get_random_int 0, @map.height-1
+            if @map.is_tile_walkable posx, posy
+                if @map.is_tile_free posx, posy
+                    good = true
+                    pl.set_position posx, posy
+
+        @scope.new_event "default", pl.name + " has been respawned"
+        @map.add_game_object pl
+
 
     spawn_powerup: () ->
 
@@ -101,10 +120,14 @@
     player_death: (pl) ->
         ind = $.inArray(pl, @players)
         @map.remove_game_object pl
-        @players.splice(ind, 1)
+        # @players.splice(ind, 1)
         @scope.new_event "danger", pl.name + " died"
 
-        @spawn_new_player()
+        # Set respawn timeout - from 10 to 20 timeframes
+        pl.state = PSTATE_DEATH
+        pl.respawn_timeout = get_random_int 10, 20
+
+        # @spawn_new_player()
 
     player_won: (pl) ->
         # Player has reached the winning score
