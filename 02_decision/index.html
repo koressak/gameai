@@ -6,53 +6,17 @@
         <!-- Bootstrap -->
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/game.css" rel="stylesheet">
-        <script type="text/javascript" src="lib/jquery-2.0.3.min.js"></script>
-        <script type="text/javascript" src="lib/underscore-min.js"></script>
-        <script type="text/javascript" src="lib/processing-1.4.1.js"></script>
     </head>
     <body>
         <div class="container">
-            <div class="row">
-                <div class="col-md-7">
-                    <h1>Basic decision making</h1>
-                    <p>Basic layout: the world is unknown, better to say unexplored.</p>
-                    <p>While the player explores the world (map is uncovering) he finds power ups.<br>
-                    If such power up is encountered, player chooses to pick it up and consume it. 
-                    Exploration is done randomly - player keeps track of tiles he has not been to and if he has no other task to do, he picks up one tile and finds his way to it.</p>
-                    <ul>
-                        <li><strong>Health bonus</strong> - instant +20 of players health.</li>
-                        <li>
-                        <strong>Speed bonus</strong> - +1 action per frame step, 3 frame steps timeout.</li>
-                    </ul>
-
-                    <p>
-                        <strong>Decision tree status</strong>: For each step, the decision tree is traversed to find first node with non empty action and this action is the final decision for the moment.
-                    </p>
-                    <p>
-                        Currently implemented actions:
-                    </p>
-                    <ul>
-                        <li>If can see and object
-                            <ul>
-                                <li>If is object consumable - consume</li>
-                                <li>Else explore the map further</li>
-                            </ul>
-                        </li>
-                        <li>Otherwise explore</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-md-8">
-                    <canvas id="gamecanvas" width="640" height="480"></canvas>
-                </div>
-                <div class="col-md-4">
-                    <h5>Game stats</h5>
-                    <div id="gamestats">
-                    </div>
-                </div>
-            </div>
+            <div ng-view></div>
         </div>
+
+        <script type="text/javascript" src="lib/jquery-2.0.3.min.js"></script>
+        <script type="text/javascript" src="lib/angular.min.js"></script>
+        <script type="text/javascript" src="lib/angular-route.min.js"></script>
+        <script type="text/javascript" src="lib/underscore-min.js"></script>
+        <script type="text/javascript" src="lib/processing-1.4.1.js"></script>
 
         <script type="text/javascript" src="js/decisiontree.js"></script>
         <script type="text/javascript" src="js/gameobject.js"></script>
@@ -63,9 +27,13 @@
         <script type="text/javascript" src="js/game.js"></script>
         <script type="text/javascript" src="js/graphics.js"></script>
         <script type="text/javascript" src="js/init.js"></script>
+
+        <!-- Angular stuff -->
+        <script type="text/javascript" src="js/app/ngapp.js"></script>
+        <script type="text/javascript" src="js/app/gamectrl.js"></script>
         <script type="text/javascript">
             $(document).ready(function(){
-                window.init_game('gamecanvas');
+                window.init_app();
             })
         </script>
         <script type="text/javascript" src="js/analytics.js"></script>

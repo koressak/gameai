@@ -1,1 +1,8 @@
-.icon-powerup-defend{background-image:url("../images/powerups.png");background-position:-5px -5px;background-repeat:no-repeat;width:115px;height:115px;display:block}
+.icon-powerup-defend {
+  background-image: url("../images/powerups.png");
+  background-position: -5px -5px;
+  background-repeat: no-repeat;
+  width: 115px;
+  height: 115px;
+  display: block;
+}
