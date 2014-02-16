@@ -21,11 +21,13 @@
         <br>
         <div class="row">
             <div class="col-md-12">
+                <p>Winning score: {{winning_score}}</p>
                 <div ng-repeat="player in players" class="panel panel-default player-stats">
                     <div class="panel-heading">{{player.name}}</div>
                     <div class="panel-body">
                         <p>
                             Health: <span class="badge">{{player.health}}</span><br>
+                            Armor: <span class="badge">{{player.armor}}</span><br>
                             Speed: <span class="badge">{{player.speed}}</span>
                             Damage: <span class="badge">{{player.damage}}</span>
                             Score: <span class="badge">{{player.score}}</span>

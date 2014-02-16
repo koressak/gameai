@@ -50,4 +50,20 @@
         if player[@type] > MAX_HEALTH
             player[@type] = MAX_HEALTH
 
+
+@FirepowerPowerUp = class _FirepowerPowerUp extends @PowerUp
+    init: ->
+        @bonus = 2  # amount of bonus
+        @timeout = 0  # instantly used 
+        @type = 'damage'
+        @image = 'images/powerups/firepower.png'
+        @load_image()
+
+@ArmorPowerUp = class _ArmorPowerUp extends @PowerUp
+    init: ->
+        @bonus = 5  # amount of bonus
+        @timeout = 0  # instantly used 
+        @type = 'armor'
+        @image = 'images/powerups/defend.png'
+        @load_image()
  

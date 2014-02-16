@@ -23,6 +23,7 @@
 
         @name = ''
         @health = MAX_HEALTH
+        @armor = 0
         @damage = 5
         @speed = 1
         @sight_radius = 1
@@ -126,16 +127,16 @@
         # If the seeable object is consumable (powerup)
         # For starters - we pick just the first one we see
         obj = @seeable_objects[0]
-        console.log 'Is consumable'
+        # console.log 'Is consumable'
         # console.log obj
-        console.log obj instanceof PowerUp
+        # console.log obj instanceof PowerUp
         obj instanceof PowerUp
 
     is_object_player: ->
         obj = @seeable_objects[0]
-        console.log 'Is Player'
+        # console.log 'Is Player'
         # console.log obj
-        console.log obj instanceof Player
+        # console.log obj instanceof Player
         obj instanceof Player
 
     # --- Attack and flee
@@ -158,8 +159,8 @@
         @state = PSTATE_ATTACK
 
         obj = @seeable_objects[0]
-        console.log @name + ": attacking"
-        console.log "Inflicting damage: " + @damage
+        # console.log @name + ": attacking"
+        # console.log "Inflicting damage: " + @damage
         obj.get_damaged @damage
 
         if obj.health <= 0
@@ -168,27 +169,36 @@
             # remove object from game
             g.player_death obj
 
+            if @score == winning_score
+                g.player_won @
+
+
     get_damaged: (dmg) ->
-        console.log @name + ": got injured for " + dmg
-        @health -= dmg
+        # console.log @name + ": got injured for " + dmg
+        if dmg > @armor
+            res = Math.abs @armor-dmg
+            @armor = 0
+            @health -= res
+        else
+            @armor -= dmg
 
     can_flee: ->
         # Get adjacent tiles and see, if there is a way to retreat
         map = g.get_map()
         tiles = map.get_adjacent_tiles @posx, @posy
 
-        console.log "Can flee?"
-        console.log tiles
+        # console.log "Can flee?"
+        # console.log tiles
         for t in tiles
             if t.is_walkable()
                 @retreat_tile = t
-                console.log "Retreat tile: ", @retreat_tile
+                # console.log "Retreat tile: ", @retreat_tile
                 return true
         false
 
     flee: ->
         @state = PSTATE_FLEE
-        console.log @name, "Fleeing"
+        # console.log @name, "Fleeing"
         nx = @retreat_tile.posx - @posx
         ny = @retreat_tile.posy - @posy
         @move nx, ny

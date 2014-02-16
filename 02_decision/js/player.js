@@ -38,6 +38,7 @@
       this.decision = dbuilder.generate_tree();
       this.name = '';
       this.health = MAX_HEALTH;
+      this.armor = 0;
       this.damage = 5;
       this.speed = 1;
       this.sight_radius = 1;
@@ -137,16 +138,12 @@
     _Player.prototype.is_object_consumable = function() {
       var obj;
       obj = this.seeable_objects[0];
-      console.log('Is consumable');
-      console.log(obj instanceof PowerUp);
       return obj instanceof PowerUp;
     };
 
     _Player.prototype.is_object_player = function() {
       var obj;
       obj = this.seeable_objects[0];
-      console.log('Is Player');
-      console.log(obj instanceof Player);
       return obj instanceof Player;
     };
 
@@ -172,31 +169,35 @@
       var obj;
       this.state = PSTATE_ATTACK;
       obj = this.seeable_objects[0];
-      console.log(this.name + ": attacking");
-      console.log("Inflicting damage: " + this.damage);
       obj.get_damaged(this.damage);
       if (obj.health <= 0) {
         this.score += 1;
-        return g.player_death(obj);
+        g.player_death(obj);
+        if (this.score === winning_score) {
+          return g.player_won(this);
+        }
       }
     };
 
     _Player.prototype.get_damaged = function(dmg) {
-      console.log(this.name + ": got injured for " + dmg);
-      return this.health -= dmg;
+      var res;
+      if (dmg > this.armor) {
+        res = Math.abs(this.armor - dmg);
+        this.armor = 0;
+        return this.health -= res;
+      } else {
+        return this.armor -= dmg;
+      }
     };
 
     _Player.prototype.can_flee = function() {
       var map, t, tiles, _i, _len;
       map = g.get_map();
       tiles = map.get_adjacent_tiles(this.posx, this.posy);
-      console.log("Can flee?");
-      console.log(tiles);
       for (_i = 0, _len = tiles.length; _i < _len; _i++) {
         t = tiles[_i];
         if (t.is_walkable()) {
           this.retreat_tile = t;
-          console.log("Retreat tile: ", this.retreat_tile);
           return true;
         }
       }
@@ -206,7 +207,6 @@
     _Player.prototype.flee = function() {
       var nx, ny;
       this.state = PSTATE_FLEE;
-      console.log(this.name, "Fleeing");
       nx = this.retreat_tile.posx - this.posx;
       ny = this.retreat_tile.posy - this.posy;
       return this.move(nx, ny);

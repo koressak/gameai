@@ -31,6 +31,9 @@
 
     _Class.prototype.game_loop = function() {
       var delta, i, ind, now, p, _i, _ref;
+      if (this.game_finished) {
+        return true;
+      }
       now = new Date;
       delta = now - this.last_move_time;
       if (delta > frame_step) {
@@ -74,9 +77,13 @@
 
     _Class.prototype.spawn_powerup = function() {
       var good, p, posx, posy, type;
-      type = get_random_int(0, 1);
+      type = get_random_int(0, 3);
       if (type === 0) {
         p = new HealthPowerUp;
+      } else if (type === 1) {
+        p = new FirepowerPowerUp;
+      } else if (type === 2) {
+        p = new ArmorPowerUp;
       } else {
         p = new SpeedPowerUp;
       }
@@ -104,6 +111,12 @@
       this.players.splice(ind, 1);
       this.scope.new_event("danger", pl.name + " died");
       return this.spawn_new_player();
+    };
+
+    _Class.prototype.player_won = function(pl) {
+      this.game_finished = true;
+      this.scope.new_event("success", pl.name + " has won the game!!!");
+      return this.scope.is_game_running = false;
     };
 
     return _Class;

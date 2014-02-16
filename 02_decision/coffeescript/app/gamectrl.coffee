@@ -17,12 +17,13 @@ controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$ancho
     window.frame_step = 300 # 300 ms as a step
 
     window.powerup_spawn_percent = 15
-
+    window.winning_score = 5
     window.max_players = 5
     window.max_targets = 5
 
     $scope.is_game_running = false
     $scope.game_loaded = false
+    $scope.winning_score = winning_score
 
     $scope.players = null
     $scope.game_log = new Array

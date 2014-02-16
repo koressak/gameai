@@ -29,6 +29,11 @@
         @map
 
     game_loop: () ->
+
+        # The first player reaching the winning score, game ends
+        if @game_finished
+            return true
+
         now = new Date
 
         delta = now - @last_move_time
@@ -70,9 +75,13 @@
 
     spawn_powerup: () ->
 
-        type = get_random_int 0, 1
+        type = get_random_int 0, 3
         if type == 0
             p = new HealthPowerUp
+        else if type == 1
+            p = new FirepowerPowerUp 
+        else if type == 2
+            p = new ArmorPowerUp 
         else
             p = new SpeedPowerUp
 
@@ -96,4 +105,10 @@
         @scope.new_event "danger", pl.name + " died"
 
         @spawn_new_player()
+
+    player_won: (pl) ->
+        # Player has reached the winning score
+        @game_finished = true
+        @scope.new_event "success", pl.name + " has won the game!!!"
+        @scope.is_game_running = false
 
