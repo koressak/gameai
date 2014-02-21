@@ -46,6 +46,7 @@
       this.sight_radius = 1;
       this.respawn_timeout = 0;
       this.map = g.get_map();
+      this.powerup_locations = new Array;
       this.explored_tiles = new Array(this.map.width);
       for (i = _i = 0, _ref1 = this.map.width - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
         this.explored_tiles[i] = new Array(this.map.height);
@@ -177,6 +178,13 @@
       return false;
     };
 
+    _Player.prototype.need_healing = function() {
+      if (this.health <= CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
     _Player.prototype.attack = function() {
       var obj;
       this.state = PSTATE_ATTACK;
@@ -239,10 +247,38 @@
 
     _Player.prototype.flee = function() {
       var nx, ny;
+      this.clear_current_goal();
       this.state = PSTATE_FLEE;
       nx = this.retreat_tile.posx - this.posx;
       ny = this.retreat_tile.posy - this.posy;
       return this.move(nx, ny);
+    };
+
+    _Player.prototype.find_health = function() {
+      var know, loc, tile, x, y, _i, _len, _ref1;
+      know = false;
+      x = -1;
+      y = -1;
+      _ref1 = this.powerup_locations;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        loc = _ref1[_i];
+        if (loc.type === 'health') {
+          know = true;
+          x = loc.x;
+          y = loc.y;
+        }
+      }
+      if (know) {
+        tile = this.map.tiles[x][y];
+        this.current_path = this.find_path_to_target(tile);
+        if (!this.current_path) {
+          return this.search_player();
+        } else {
+          return this.continue_moving();
+        }
+      } else {
+        return this.search_player();
+      }
     };
 
     _Player.prototype.pick_random_tile = function() {
@@ -258,7 +294,7 @@
     };
 
     _Player.prototype.search_player = function() {
-      var nx, ny, tile, x, y, _ref1, _ref2;
+      var tile, x, y, _ref1;
       this.state = PSTATE_EXPLORE;
       if (this.current_path === null) {
         _ref1 = this.pick_random_tile(), x = _ref1[0], y = _ref1[1];
@@ -268,13 +304,27 @@
           return;
         }
       }
-      _ref2 = this.get_next_move(), nx = _ref2[0], ny = _ref2[1];
-      return this.move(nx, ny);
+      return this.continue_moving();
+    };
+
+    _Player.prototype.continue_moving = function() {
+      var nx, ny, _ref1;
+      if (this.current_path !== null) {
+        _ref1 = this.get_next_move(), nx = _ref1[0], ny = _ref1[1];
+        return this.move(nx, ny);
+      }
     };
 
     _Player.prototype.consume_object = function() {
       var obj;
       obj = this.seeable_objects.splice(0, 1)[0];
+      if ($.inArray(obj.type, this.powerup_locations === -1)) {
+        this.powerup_locations.push({
+          type: obj.type,
+          x: obj.posx,
+          y: obj.posy
+        });
+      }
       obj.pre_consume(this);
       obj.consume(this);
       obj.post_consume(this);

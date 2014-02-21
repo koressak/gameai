@@ -96,7 +96,7 @@
     };
 
     _Class.prototype.generate_tree = function() {
-      var attack, can_attack, can_flee, fsee, fsee_player, is_fighting, is_health_good, pursue, root, search_player, see, see_player, see_powerup, tree;
+      var attack, can_attack, can_flee, fsee, fsee_player, is_fighting, is_health_good, need_healing, pursue, root, search_player, see, see_player, see_powerup, tree;
       root = this.gen_new_node(null, null);
       is_fighting = this.gen_new_node('is_fighting', null);
       is_health_good = this.gen_new_node('is_health_good', 'attack');
@@ -106,6 +106,7 @@
       can_flee = this.gen_new_node('can_flee', 'flee');
       pursue = this.gen_always_true('pursue');
       search_player = this.gen_always_true('search_player');
+      need_healing = this.gen_new_node('need_healing', 'find_health');
       see_powerup = this.gen_new_node('is_object_consumable', 'consume_object');
       see_player = this.gen_new_node('is_object_player', null);
       see = this.gen_new_node('can_see_object', null);
@@ -115,7 +116,7 @@
       fsee_player.children.push(is_health_good, can_flee, attack);
       fsee.children.push(fsee_player, search_player);
       is_fighting.children.push(fsee, pursue);
-      root.children.push(is_fighting, see, search_player);
+      root.children.push(is_fighting, see, need_healing, search_player);
       tree = new DecisionTree;
       tree.set_root(root);
       return tree;

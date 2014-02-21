@@ -96,6 +96,9 @@
         # Exploring
         search_player = @gen_always_true 'search_player'
 
+        # on low health - needs healing
+        need_healing = @gen_new_node 'need_healing', 'find_health'
+
         # what to do when see an object
         see_powerup = @gen_new_node 'is_object_consumable', 'consume_object'
         see_player = @gen_new_node 'is_object_player', null
@@ -118,7 +121,7 @@
 
         # Set first root action
         # root.children.push is_fighting, see, explore
-        root.children.push is_fighting, see, search_player
+        root.children.push is_fighting, see, need_healing, search_player
 
         # Finally create a tree object
         tree = new DecisionTree
