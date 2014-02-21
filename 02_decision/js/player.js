@@ -24,6 +24,8 @@
 
   this.CRITICAL_HEALTH = 25;
 
+  this.MAX_PURSUE_LENGTH = 10;
+
   this.Player = _Player = (function(_super) {
     __extends(_Player, _super);
 
@@ -65,6 +67,8 @@
       this.current_path = null;
       this.seeable_objects = new Array;
       this.active_bonuses = new Array;
+      this.last_target = null;
+      this.pursue_length = 0;
       return this.retreat_tile = null;
     };
 
@@ -177,6 +181,7 @@
       var obj;
       this.state = PSTATE_ATTACK;
       obj = this.seeable_objects[0];
+      this.last_target = obj;
       obj.get_damaged(this.damage);
       if (obj.health <= 0) {
         this.score += 1;
@@ -198,6 +203,24 @@
       }
       anim = new Animation('images/got_damaged.png', 1);
       return this.add_animation(anim);
+    };
+
+    _Player.prototype.pursue = function() {
+      var nx, ny;
+      if (this.last_target !== null) {
+        nx = this.last_target.posx - this.posx;
+        ny = this.last_target.posy - this.posy;
+        this.move(nx, ny);
+        this.pursue_length += 1;
+        if (this.pursue_length >= MAX_PURSUE_LENGTH) {
+          this.state = PSTATE_EXPLORE;
+          this.pursue_length = 0;
+          return this.last_target = null;
+        }
+      } else {
+        this.state = PSTATE_EXPLORE;
+        return this.pursue_length = 0;
+      }
     };
 
     _Player.prototype.can_flee = function() {
@@ -242,7 +265,7 @@
         tile = this.map.tiles[x][y];
         this.current_path = this.find_path_to_target(tile);
         if (!this.current_path) {
-          throw "No feasible path found, cannot move further :(";
+          return;
         }
       }
       _ref2 = this.get_next_move(), nx = _ref2[0], ny = _ref2[1];

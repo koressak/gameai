@@ -91,6 +91,7 @@
         fsee_player = @gen_new_node 'is_object_player', null
         fsee = @gen_new_node 'can_see_object', null
         can_flee = @gen_new_node 'can_flee', 'flee'
+        pursue = @gen_always_true 'pursue'
 
         # Exploring
         search_player = @gen_always_true 'search_player'
@@ -105,15 +106,15 @@
 
 
         # --- Connection of the tree
-        see_player.children.push can_attack, can_flee
+        see_player.children.push can_attack, can_flee, attack
         see.children.push see_player, see_powerup
 
         # Fighting subtree
 
         # is_fighting
         fsee_player.children.push is_health_good, can_flee, attack
-        fsee.children.push fsee_player, search_player
-        is_fighting.children.push fsee, search_player
+        fsee.children.push fsee_player, search_player 
+        is_fighting.children.push fsee, pursue
 
         # Set first root action
         # root.children.push is_fighting, see, explore

@@ -11,6 +11,8 @@
 @MAX_HEALTH = 100
 @CRITICAL_HEALTH = 25
 
+@MAX_PURSUE_LENGTH = 10
+
 
 @Player = class _Player extends @MovableGameObject
     init: ->
@@ -58,7 +60,8 @@
         @seeable_objects = new Array
         @active_bonuses = new Array
 
-        # @attack_target = null
+        @last_target = null
+        @pursue_length = 0
         @retreat_tile = null
 
     set_state: (state) ->
@@ -167,6 +170,7 @@
         @state = PSTATE_ATTACK
 
         obj = @seeable_objects[0]
+        @last_target = obj
         # console.log @name + ": attacking"
         # console.log "Inflicting damage: " + @damage
         obj.get_damaged @damage
@@ -193,6 +197,29 @@
         # add damaged animation
         anim = new Animation 'images/got_damaged.png', 1
         @add_animation anim
+
+    pursue: ->
+        # Pursue last target if it got out of sight
+        # TODO: very, very, very cheaty
+        # console.log "Pursuing...", @last_target
+        if @last_target != null
+            nx = @last_target.posx - @posx
+            ny = @last_target.posy - @posy
+            @move nx, ny
+
+            # If we exceed number of pursue tiles, we get back to search
+            # won't be chasing that idiot for ever ;)
+            @pursue_length += 1
+            if @pursue_length >= MAX_PURSUE_LENGTH
+                # console.log "Stopping pursue due to length"
+                @state = PSTATE_EXPLORE
+                @pursue_length = 0
+                @last_target = null
+
+        else
+            # console.log "Getting back to explore"
+            @state = PSTATE_EXPLORE
+            @pursue_length = 0
 
     can_flee: ->
         # Get adjacent tiles and see, if there is a way to retreat
@@ -241,7 +268,8 @@
             # console.log "New path", @current_path
 
             if not @current_path
-                throw "No feasible path found, cannot move further :("
+                return
+                # throw "No feasible path found, cannot move further :("
 
         [nx, ny] = @get_next_move()
         @move nx, ny
