@@ -118,7 +118,7 @@
           posy = get_random_int(0, this.map.height - 1);
           if (this.map.is_tile_free(posx, posy)) {
             if (this.map.is_tile_walkable(posx, posy)) {
-              if (this.map.get_tile_object(posx, posy) === null) {
+              if (this.map.get_tile_objects(posx, posy).length === 0) {
                 good = true;
                 spawner.set_position(posx, posy);
               }

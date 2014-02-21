@@ -112,7 +112,7 @@
       see = this.gen_new_node('can_see_object', null);
       can_attack = this.gen_new_node('can_attack', 'attack');
       see_player.children.push(can_attack, can_flee, attack);
-      see.children.push(see_player, see_powerup);
+      see.children.push(see_player, see_powerup, search_player);
       fsee_player.children.push(is_health_good, can_flee, attack);
       fsee.children.push(fsee_player, search_player);
       is_fighting.children.push(fsee, pursue);

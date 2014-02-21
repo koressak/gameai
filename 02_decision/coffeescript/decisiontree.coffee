@@ -110,7 +110,7 @@
 
         # --- Connection of the tree
         see_player.children.push can_attack, can_flee, attack
-        see.children.push see_player, see_powerup
+        see.children.push see_player, see_powerup, search_player
 
         # Fighting subtree
 

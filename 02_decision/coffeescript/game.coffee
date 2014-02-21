@@ -134,7 +134,7 @@
                 posy = get_random_int 0, @map.height-1
                 if @map.is_tile_free posx, posy
                     if @map.is_tile_walkable posx, posy
-                        if @map.get_tile_object(posx, posy) == null
+                        if @map.get_tile_objects(posx, posy).length == 0
                             good = true
                             spawner.set_position posx, posy
                             # console.log "On position: ", posx, posy

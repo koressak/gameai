@@ -7,7 +7,8 @@
         @terrain = terrain
         @posx = x
         @posy = y
-        @object = null
+        # @object = null
+        @objects = new Array
         @explored = true 
         @unexplored_image = null
 
@@ -20,25 +21,34 @@
 
         @unexplored_image = pinst.loadImage('images/unexplored.png')
 
-    set_object: (obj) ->
-        @object = obj
+    # set_object: (obj) ->
+    #     @object = obj
 
-    get_object: ->
-        @object
+    add_object: (obj) ->
+        @objects.push obj
 
-    remove_object: ->
-        o = @object
-        @object = null
-        o
+    get_objects: ->
+        @objects
+
+    # get_first_object: ->
+    #     @object
+
+    remove_object: (obj) ->
+        ind = $.inArray(obj, @objects)
+        if ind != -1
+            o = @objects.splice ind, 1
+            return o[0]
+        null
 
     is_walkable: ->
         if not @walkable
             return false
 
-        if @object != null 
-            if @object instanceof Player
-                # console.log "Tile not walkable - Player is here"
-                return false
+        if @objects.length > 0
+            # for o in @objects
+            #     if o instanceof Player
+            #         # console.log "Tile not walkable - Player is here"
+            return false
 
         true
 
@@ -47,8 +57,9 @@
         y = @posy * tile_height
         window.pinst.image(@image, x, y, tile_width, tile_height)
 
-        if @object != null
-            @object.draw()
+        # if @object != null
+        for o in @objects
+            o.draw()
 
         # If tile is unexplored we have to cover it with new layer
         if not @explored
@@ -74,23 +85,23 @@
     add_game_object: (obj) ->
         if $.inArray obj, @game_objects == -1
             @game_objects.push obj
-            @tiles[obj.posx][obj.posy].set_object obj
+            @tiles[obj.posx][obj.posy].add_object obj
 
-    move_game_object: (ox, oy, nx, ny) ->
+    move_game_object: (obj, ox, oy, nx, ny) ->
         # Set tile explored if someone is moving to it
         @set_tile_explored nx, ny
-        o = @tiles[ox][oy].remove_object()
+        o = @tiles[ox][oy].remove_object obj
         # console.log "Moving game object"
         # console.log o
         if o != null
-            @tiles[nx][ny].set_object o
+            @tiles[nx][ny].add_object o
 
     remove_game_object: (obj) ->
         ind =  $.inArray obj, @game_objects
 
         if ind != -1
             o = @game_objects[ind]
-            @tiles[o.posx][o.posy].remove_object()
+            @tiles[o.posx][o.posy].remove_object obj
             @game_objects.splice ind, 1
 
     is_tile_walkable: (x, y) ->
@@ -108,15 +119,17 @@
         if y < 0 or y > @height-1
             return false
 
-        @tiles[x][y].get_object() == null
+        # @tiles[x][y].get_objects() == null
+        @tiles[x][y].get_objects().length == 0
 
-    get_tile_object: (x, y) ->
+
+    get_tile_objects: (x, y) ->
         if x < 0 or x > @width-1
             return null
         if y < 0 or y > @height-1
             return null 
 
-        @tiles[x][y].get_object()
+        @tiles[x][y].get_objects()
 
     set_tile_explored: (x, y) ->
         @tiles[x][y].explored = true

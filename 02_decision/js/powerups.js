@@ -16,7 +16,9 @@
       this.active = false;
       this.respawn_time = 20;
       this.time_to_respawn = 0;
-      return this.power_class = pwr_cls;
+      this.power_class = pwr_cls;
+      this.image = 'images/spawnpoint.png';
+      return this.load_image();
     };
 
     _PwrUpSpwn.prototype.frame = function() {
@@ -32,8 +34,7 @@
 
     _PwrUpSpwn.prototype.consumed = function() {
       this.active = false;
-      this.time_to_respawn = this.respawn_time;
-      return this.hide();
+      return this.time_to_respawn = this.respawn_time;
     };
 
     _PwrUpSpwn.prototype.spawn_power_up = function() {

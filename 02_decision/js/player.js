@@ -140,24 +140,36 @@
       this.seeable_objects = new Array;
       tiles = this.map.get_adjacent_tiles(this.posx, this.posy);
       for (i = _i = 0, _ref1 = tiles.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-        o = tiles[i].get_object();
-        if (o !== null) {
-          this.seeable_objects.push(o);
+        o = tiles[i].get_objects();
+        if (o.length > 0) {
+          this.seeable_objects = this.seeable_objects.concat(o);
         }
       }
       return this.seeable_objects.length !== 0;
     };
 
     _Player.prototype.is_object_consumable = function() {
-      var obj;
-      obj = this.seeable_objects[0];
-      return obj instanceof PowerUp;
+      var obj, _i, _len, _ref1;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof PowerUp) {
+          return true;
+        }
+      }
+      return false;
     };
 
     _Player.prototype.is_object_player = function() {
-      var obj;
-      obj = this.seeable_objects[0];
-      return obj instanceof Player;
+      var obj, _i, _len, _ref1;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof Player) {
+          return true;
+        }
+      }
+      return false;
     };
 
     _Player.prototype.is_fighting = function() {
@@ -186,14 +198,23 @@
     };
 
     _Player.prototype.attack = function() {
-      var obj;
+      var obj, target, _i, _len, _ref1;
       this.state = PSTATE_ATTACK;
-      obj = this.seeable_objects[0];
-      this.last_target = obj;
-      obj.get_damaged(this.damage);
-      if (obj.health <= 0) {
+      target = null;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof Player) {
+          target = obj;
+          break;
+        }
+      }
+      this.last_target = target;
+      target.get_damaged(this.damage);
+      if (target.health <= 0) {
         this.score += 1;
-        g.player_death(obj);
+        g.player_death(target);
+        this.last_target = null;
         if (this.score === winning_score) {
           return g.player_won(this);
         }
@@ -227,7 +248,8 @@
         }
       } else {
         this.state = PSTATE_EXPLORE;
-        return this.pursue_length = 0;
+        this.pursue_length = 0;
+        return this.last_target = null;
       }
     };
 
@@ -316,8 +338,20 @@
     };
 
     _Player.prototype.consume_object = function() {
-      var obj;
-      obj = this.seeable_objects.splice(0, 1)[0];
+      var ind, o, obj, _i, _len, _ref1;
+      obj = null;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        o = _ref1[_i];
+        if (o instanceof PowerUp) {
+          obj = o;
+          break;
+        }
+      }
+      ind = $.inArray(obj, this.seeable_objects);
+      if (ind !== -1) {
+        this.seeable_objects.splice(ind, 1);
+      }
       if ($.inArray(obj.type, this.powerup_locations === -1)) {
         this.powerup_locations.push({
           type: obj.type,
@@ -327,26 +361,20 @@
       }
       obj.pre_consume(this);
       obj.consume(this);
-      obj.post_consume(this);
-      return this.move(obj.posx - this.posx, obj.posy - this.posy);
+      return obj.post_consume(this);
     };
 
     _Player.prototype.do_action = function() {
-      var err, i, node, _i, _ref1, _results;
+      var i, node, _i, _ref1, _results;
       this.process_bonuses();
       _results = [];
       for (i = _i = 1, _ref1 = this.speed; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
         node = this.decision.make_decision(this);
         if (node !== null) {
           this.current_action = node.action;
-          try {
-            _results.push(this[this.current_action]());
-          } catch (_error) {
-            err = _error;
-            _results.push(console.error(err));
-          }
+          _results.push(this[this.current_action]());
         } else {
-          _results.push(console.log("We have no action to take. Returned node is null"));
+          _results.push(console.log("Player", this.number, " We have no action to take. Returned node is null"));
         }
       }
       return _results;

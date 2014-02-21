@@ -129,9 +129,11 @@
         @seeable_objects = new Array
         tiles = @map.get_adjacent_tiles @posx, @posy
         for i in [0..tiles.length-1]
-            o = tiles[i].get_object()
-            if o != null
-                @seeable_objects.push o
+            o = tiles[i].get_objects()
+            # console.log o, o.length
+            if o.length > 0
+                @seeable_objects = @seeable_objects.concat o
+                # console.log "seeable objects ", @seeable_objects
 
         # console.log "Seeable objects", @seeable_objects
         # console.log "Result", @seeable_objects.length
@@ -140,18 +142,25 @@
     is_object_consumable: ->
         # If the seeable object is consumable (powerup)
         # For starters - we pick just the first one we see
-        obj = @seeable_objects[0]
-        # console.log 'Is consumable'
-        # console.log obj
-        # console.log obj instanceof PowerUp
-        obj instanceof PowerUp
+        # console.log "Not consuming: ", @seeable_objects
+        for obj in @seeable_objects
+            if obj instanceof PowerUp
+                return true
+        # obj = @seeable_objects[0]
+        # console.log "First object ", obj
+        # console.log 'Is consumable', obj instanceof PowerUp
+        # obj instanceof PowerUp
+        false
 
     is_object_player: ->
-        obj = @seeable_objects[0]
+        for obj in @seeable_objects
+            if obj instanceof Player
+                return true
         # console.log 'Is Player'
         # console.log obj
         # console.log obj instanceof Player
-        obj instanceof Player
+        # obj instanceof Player
+        false
 
     # --- Attack and flee
     is_fighting: ->
@@ -179,17 +188,27 @@
     attack: ->
         @state = PSTATE_ATTACK
 
-        obj = @seeable_objects[0]
-        @last_target = obj
+        target = null
+        # if @last_target
+        #     target = @last_target
+        # else
+        for obj in @seeable_objects
+            if obj instanceof Player
+                target = obj
+                break
+
+        @last_target = target
         # console.log @name + ": attacking"
         # console.log "Inflicting damage: " + @damage
-        obj.get_damaged @damage
+        target.get_damaged @damage
 
-        if obj.health <= 0
+        if target.health <= 0
             # increment score
             @score += 1
             # remove object from game
-            g.player_death obj
+            # obj.remove_animation()
+            g.player_death target
+            @last_target = null
 
             if @score == winning_score
                 g.player_won @
@@ -230,6 +249,7 @@
             # console.log "Getting back to explore"
             @state = PSTATE_EXPLORE
             @pursue_length = 0
+            @last_target = null
 
     can_flee: ->
         # Get adjacent tiles and see, if there is a way to retreat
@@ -316,7 +336,15 @@
     # --- Interact with nearby objects
     consume_object: ->
         # Consume nearby object (powerup in this case)
-        obj = @seeable_objects.splice(0,1)[0]
+        obj = null
+        for o in @seeable_objects
+            if o instanceof PowerUp
+                obj = o
+                break;
+        ind = $.inArray obj, @seeable_objects
+        if ind != -1
+            @seeable_objects.splice ind, 1
+        # obj = @seeable_objects.splice(0,1)[0]
 
         # Check for known location of this object
         if $.inArray obj.type, @powerup_locations == -1
@@ -332,7 +360,7 @@
         obj.consume @
         obj.post_consume @
         # move to it's place
-        @move obj.posx-@posx, obj.posy-@posy
+        # @move obj.posx-@posx, obj.posy-@posy
 
 
     # --- Main loop for a player - make and execute decision
@@ -346,16 +374,16 @@
 
         for i in [1..@speed]
             node = @decision.make_decision @
-            # console.log 'Current decision node'
+            # console.log "Player", @number, 'Current decision node'
             # console.log node
             if node != null
                 @current_action = node.action
                 # TODO: enable the try/catch
-                try
-                    @[@current_action]()
-                catch err
-                    console.error err
+                # try
+                @[@current_action]()
+                # catch err
+                #     console.error err
             else
-                console.log "We have no action to take. Returned node is null"
+                console.log "Player", @number, " We have no action to take. Returned node is null"
 
 

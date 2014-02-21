@@ -4,6 +4,8 @@
         @respawn_time = 20 # Frame steps
         @time_to_respawn = 0
         @power_class = pwr_cls
+        @image = 'images/spawnpoint.png'
+        @load_image()
 
     frame: ->
         # If has some probability - spawn again
@@ -17,7 +19,7 @@
     consumed: ->
         @active = false
         @time_to_respawn = @respawn_time
-        @hide()
+        # @hide()
 
     spawn_power_up: ->
         pwr = new @power_class 
