@@ -42,6 +42,7 @@
       this.pr = pinst;
       this.font = this.pr.loadFont('Arial');
       this.animation = null;
+      this.hidden = false;
     }
 
     _Class.prototype.set_position = function(x, y) {
@@ -86,18 +87,30 @@
       }
     };
 
+    _Class.prototype.hide = function() {
+      return this.hidden = true;
+    };
+
+    _Class.prototype.unhide = function() {
+      return this.hidden = false;
+    };
+
     _Class.prototype.draw = function() {
       var x, y;
-      x = this.posx * window.tile_width;
-      y = this.posy * window.tile_height;
-      if (this.animation !== null) {
-        this.animation.draw();
-      } else {
-        this.pr.image(this.img, x, y, window.tile_width, window.tile_height);
-      }
-      if (this instanceof Player) {
-        this.pr.textFont(this.font, 10);
-        return this.pr.text(this.number, x + 12, y);
+      if (!this.hidden) {
+        x = this.posx * window.tile_width;
+        y = this.posy * window.tile_height;
+        if (this.animation !== null) {
+          this.animation.draw();
+        } else {
+          if (this.img !== null) {
+            this.pr.image(this.img, x, y, window.tile_width, window.tile_height);
+          }
+        }
+        if (this instanceof Player) {
+          this.pr.textFont(this.font, 10);
+          return this.pr.text(this.number, x + 12, y);
+        }
       }
     };
 

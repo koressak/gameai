@@ -1,12 +1,44 @@
+@PowerUpSpawner = class _PwrUpSpwn extends @GameObject
+    init: (pwr_cls) ->
+        @active = false
+        @respawn_time = 20 # Frame steps
+        @time_to_respawn = 0
+        @power_class = pwr_cls
+
+    frame: ->
+        # If has some probability - spawn again
+        unless @active
+            @time_to_respawn -= 1
+            if @time_to_respawn <= 0
+                @unhide()
+                @active = true
+                @spawn_power_up()
+
+    consumed: ->
+        @active = false
+        @time_to_respawn = @respawn_time
+        @hide()
+
+    spawn_power_up: ->
+        pwr = new @power_class 
+        pwr.init()
+        pwr.posx = @posx
+        pwr.posy = @posy
+        pwr.spawner = @
+        pwr.add_to_game()
+
+
 @PowerUp = class _PowerUp extends @GameObject
     init: ->
         @bonus = 0  # amount of bonus
         @timeout = 0  # Timeout 
         @type = ''
+        @spawner = null
 
     consume: (player) ->
         player[@type] += @bonus
         # console.log "Removing powerup from game", @
+        @spawner.consumed()
         @remove_from_game()
 
     pre_consume: (player) ->
@@ -31,6 +63,7 @@
         player[@type] += @bonus
         player.active_bonuses.push @
         # console.log "Removing powerup from game", @
+        @spawner.consumed()
         @remove_from_game()
 
     do_timeout: (player) ->

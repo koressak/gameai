@@ -6,7 +6,7 @@
     }
 
     _Class.prototype.init_game = function(scope) {
-      var i, _i, _ref, _results;
+      var i, _i, _ref;
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
@@ -14,11 +14,10 @@
       this.player_counter = 0;
       this.last_move_time = new Date;
       this.players = new Array;
-      _results = [];
       for (i = _i = 0, _ref = max_players - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        _results.push(this.spawn_new_player());
+        this.spawn_new_player();
       }
-      return _results;
+      return this.init_powerup_spawners();
     };
 
     _Class.prototype.get_player = function(x) {
@@ -34,7 +33,7 @@
     };
 
     _Class.prototype.game_loop = function() {
-      var delta, i, ind, now, o, p, _i, _j, _len, _ref, _ref1;
+      var delta, i, now, o, p, _i, _j, _len, _ref, _ref1;
       if (this.game_finished) {
         return true;
       }
@@ -57,10 +56,6 @@
               this.respawn_player(p);
             }
           }
-        }
-        ind = Math.floor(Math.random() * 100);
-        if (ind <= powerup_spawn_percent) {
-          this.spawn_powerup();
         }
         return this.scope.update_ui();
       }
@@ -109,33 +104,30 @@
       return this.map.add_game_object(pl);
     };
 
-    _Class.prototype.spawn_powerup = function() {
-      var good, p, posx, posy, type;
-      type = get_random_int(0, 3);
-      if (type === 0) {
-        p = new HealthPowerUp;
-      } else if (type === 1) {
-        p = new FirepowerPowerUp;
-      } else if (type === 2) {
-        p = new ArmorPowerUp;
-      } else {
-        p = new SpeedPowerUp;
-      }
-      p.init();
-      good = false;
-      while (!good) {
-        posx = get_random_int(0, this.map.width - 1);
-        posy = get_random_int(0, this.map.height - 1);
-        if (this.map.is_tile_free(posx, posy)) {
-          if (this.map.is_tile_walkable(posx, posy)) {
-            if (this.map.get_tile_object(posx, posy) === null) {
-              good = true;
-              p.set_position(posx, posy);
+    _Class.prototype.init_powerup_spawners = function() {
+      var good, posx, posy, spawner, type, types, _i, _len, _results;
+      types = [HealthPowerUp, FirepowerPowerUp, ArmorPowerUp, SpeedPowerUp];
+      _results = [];
+      for (_i = 0, _len = types.length; _i < _len; _i++) {
+        type = types[_i];
+        spawner = new PowerUpSpawner;
+        spawner.init(type);
+        good = false;
+        while (!good) {
+          posx = get_random_int(0, this.map.width - 1);
+          posy = get_random_int(0, this.map.height - 1);
+          if (this.map.is_tile_free(posx, posy)) {
+            if (this.map.is_tile_walkable(posx, posy)) {
+              if (this.map.get_tile_object(posx, posy) === null) {
+                good = true;
+                spawner.set_position(posx, posy);
+              }
             }
           }
         }
+        _results.push(spawner.add_to_game());
       }
-      return p.add_to_game();
+      return _results;
     };
 
     _Class.prototype.player_death = function(pl) {

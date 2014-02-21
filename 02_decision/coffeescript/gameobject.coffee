@@ -30,6 +30,7 @@
         @pr = pinst
         @font = @pr.loadFont('Arial')
         @animation = null
+        @hidden = false
 
     set_position: (x, y) ->
         @posx = x
@@ -63,19 +64,27 @@
         if @animation != null
             @animation.frame()
 
+    hide: ->
+        # Hide game object - so it's not drawn
+        @hidden = true
+
+    unhide: ->
+        @hidden = false 
+
     draw: () ->
-        x = @posx * window.tile_width
-        y = @posy * window.tile_height
+        unless @hidden
+            x = @posx * window.tile_width 
+            y = @posy * window.tile_height
+            if @animation != null
+                @animation.draw()
+            else
+                if @img != null
+                    @pr.image(@img, x, y, window.tile_width, window.tile_height)
 
-        if @animation != null
-            @animation.draw()
-        else
-            @pr.image(@img, x, y, window.tile_width, window.tile_height)
-
-        # Draw a player name
-        if @ instanceof Player
-            @pr.textFont(@font, 10)
-            @pr.text(@number, x+12, y)
+            # Draw a player name
+            if @ instanceof Player
+                @pr.textFont(@font, 10)
+                @pr.text(@number, x+12, y)
 
 
 

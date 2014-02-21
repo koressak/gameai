@@ -18,6 +18,9 @@
         for i in [0..max_players-1]
             @spawn_new_player()
 
+        # Spawn powerups
+        @init_powerup_spawners()
+
     get_player: (x) ->
         if x < @players.length
             @players[x]
@@ -54,9 +57,9 @@
                     if p.respawn_timeout <= 0
                         @respawn_player p
 
-            ind = Math.floor(Math.random()*100)
-            if ind <= powerup_spawn_percent
-                @spawn_powerup()
+            # ind = Math.floor(Math.random()*100)
+            # if ind <= powerup_spawn_percent
+            #     @spawn_powerup()
             @scope.update_ui()
 
 
@@ -101,30 +104,42 @@
         @map.add_game_object pl
 
 
-    spawn_powerup: () ->
+    init_powerup_spawners: ->
 
-        type = get_random_int 0, 3
-        if type == 0
-            p = new HealthPowerUp
-        else if type == 1
-            p = new FirepowerPowerUp 
-        else if type == 2
-            p = new ArmorPowerUp 
-        else
-            p = new SpeedPowerUp
+        types = [
+            HealthPowerUp
+            FirepowerPowerUp
+            ArmorPowerUp
+            SpeedPowerUp
+        ]
 
-        p.init()
-        good = false
-        while not good
-            posx = get_random_int 0, @map.width-1
-            posy = get_random_int 0, @map.height-1
-            if @map.is_tile_free posx, posy
-                if @map.is_tile_walkable posx, posy
-                    if @map.get_tile_object(posx, posy) == null
-                        good = true
-                        p.set_position posx, posy
+        # type = get_random_int 0, 3
+        # if type == 0
+        #     p = new HealthPowerUp
+        # else if type == 1
+        #     p = new FirepowerPowerUp 
+        # else if type == 2
+        #     p = new ArmorPowerUp 
+        # else
+        #     p = new SpeedPowerUp
 
-        p.add_to_game()
+        for type in types
+            # console.log "Initializing powerup spawner"
+            spawner = new PowerUpSpawner
+            spawner.init type
+
+            good = false
+            while not good
+                posx = get_random_int 0, @map.width-1
+                posy = get_random_int 0, @map.height-1
+                if @map.is_tile_free posx, posy
+                    if @map.is_tile_walkable posx, posy
+                        if @map.get_tile_object(posx, posy) == null
+                            good = true
+                            spawner.set_position posx, posy
+                            # console.log "On position: ", posx, posy
+
+            spawner.add_to_game()
 
     player_death: (pl) ->
         ind = $.inArray(pl, @players)
