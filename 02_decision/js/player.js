@@ -24,6 +24,8 @@
 
   this.CRITICAL_HEALTH = 25;
 
+  this.MAX_PURSUE_LENGTH = 10;
+
   this.Player = _Player = (function(_super) {
     __extends(_Player, _super);
 
@@ -44,6 +46,7 @@
       this.sight_radius = 1;
       this.respawn_timeout = 0;
       this.map = g.get_map();
+      this.powerup_locations = new Array;
       this.explored_tiles = new Array(this.map.width);
       for (i = _i = 0, _ref1 = this.map.width - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
         this.explored_tiles[i] = new Array(this.map.height);
@@ -65,6 +68,8 @@
       this.current_path = null;
       this.seeable_objects = new Array;
       this.active_bonuses = new Array;
+      this.last_target = null;
+      this.pursue_length = 0;
       return this.retreat_tile = null;
     };
 
@@ -135,24 +140,36 @@
       this.seeable_objects = new Array;
       tiles = this.map.get_adjacent_tiles(this.posx, this.posy);
       for (i = _i = 0, _ref1 = tiles.length - 1; 0 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 0 <= _ref1 ? ++_i : --_i) {
-        o = tiles[i].get_object();
-        if (o !== null) {
-          this.seeable_objects.push(o);
+        o = tiles[i].get_objects();
+        if (o.length > 0) {
+          this.seeable_objects = this.seeable_objects.concat(o);
         }
       }
       return this.seeable_objects.length !== 0;
     };
 
     _Player.prototype.is_object_consumable = function() {
-      var obj;
-      obj = this.seeable_objects[0];
-      return obj instanceof PowerUp;
+      var obj, _i, _len, _ref1;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof PowerUp) {
+          return true;
+        }
+      }
+      return false;
     };
 
     _Player.prototype.is_object_player = function() {
-      var obj;
-      obj = this.seeable_objects[0];
-      return obj instanceof Player;
+      var obj, _i, _len, _ref1;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof Player) {
+          return true;
+        }
+      }
+      return false;
     };
 
     _Player.prototype.is_fighting = function() {
@@ -160,27 +177,44 @@
     };
 
     _Player.prototype.can_attack = function() {
-      if (this.health > CRITICAL_HEALTH) {
+      if ((this.health + this.armor) > CRITICAL_HEALTH) {
         return true;
       }
       return false;
     };
 
     _Player.prototype.is_health_good = function() {
-      if (this.health > CRITICAL_HEALTH) {
+      if ((this.health + this.armor) > CRITICAL_HEALTH) {
+        return true;
+      }
+      return false;
+    };
+
+    _Player.prototype.need_healing = function() {
+      if (this.health <= CRITICAL_HEALTH) {
         return true;
       }
       return false;
     };
 
     _Player.prototype.attack = function() {
-      var obj;
+      var obj, target, _i, _len, _ref1;
       this.state = PSTATE_ATTACK;
-      obj = this.seeable_objects[0];
-      obj.get_damaged(this.damage);
-      if (obj.health <= 0) {
+      target = null;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        obj = _ref1[_i];
+        if (obj instanceof Player) {
+          target = obj;
+          break;
+        }
+      }
+      this.last_target = target;
+      target.get_damaged(this.damage);
+      if (target.health <= 0) {
         this.score += 1;
-        g.player_death(obj);
+        g.player_death(target);
+        this.last_target = null;
         if (this.score === winning_score) {
           return g.player_won(this);
         }
@@ -188,13 +222,34 @@
     };
 
     _Player.prototype.get_damaged = function(dmg) {
-      var res;
+      var anim, res;
       if (dmg > this.armor) {
         res = Math.abs(this.armor - dmg);
         this.armor = 0;
-        return this.health -= res;
+        this.health -= res;
       } else {
-        return this.armor -= dmg;
+        this.armor -= dmg;
+      }
+      anim = new Animation('images/got_damaged.png', 1);
+      return this.add_animation(anim);
+    };
+
+    _Player.prototype.pursue = function() {
+      var nx, ny;
+      if (this.last_target !== null) {
+        nx = this.last_target.posx - this.posx;
+        ny = this.last_target.posy - this.posy;
+        this.move(nx, ny);
+        this.pursue_length += 1;
+        if (this.pursue_length >= MAX_PURSUE_LENGTH) {
+          this.state = PSTATE_EXPLORE;
+          this.pursue_length = 0;
+          return this.last_target = null;
+        }
+      } else {
+        this.state = PSTATE_EXPLORE;
+        this.pursue_length = 0;
+        return this.last_target = null;
       }
     };
 
@@ -214,10 +269,38 @@
 
     _Player.prototype.flee = function() {
       var nx, ny;
+      this.clear_current_goal();
       this.state = PSTATE_FLEE;
       nx = this.retreat_tile.posx - this.posx;
       ny = this.retreat_tile.posy - this.posy;
       return this.move(nx, ny);
+    };
+
+    _Player.prototype.find_health = function() {
+      var know, loc, tile, x, y, _i, _len, _ref1;
+      know = false;
+      x = -1;
+      y = -1;
+      _ref1 = this.powerup_locations;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        loc = _ref1[_i];
+        if (loc.type === 'health') {
+          know = true;
+          x = loc.x;
+          y = loc.y;
+        }
+      }
+      if (know) {
+        tile = this.map.tiles[x][y];
+        this.current_path = this.find_path_to_target(tile);
+        if (!this.current_path) {
+          return this.search_player();
+        } else {
+          return this.continue_moving();
+        }
+      } else {
+        return this.search_player();
+      }
     };
 
     _Player.prototype.pick_random_tile = function() {
@@ -233,45 +316,65 @@
     };
 
     _Player.prototype.search_player = function() {
-      var nx, ny, tile, x, y, _ref1, _ref2;
+      var tile, x, y, _ref1;
       this.state = PSTATE_EXPLORE;
       if (this.current_path === null) {
         _ref1 = this.pick_random_tile(), x = _ref1[0], y = _ref1[1];
         tile = this.map.tiles[x][y];
         this.current_path = this.find_path_to_target(tile);
         if (!this.current_path) {
-          throw "No feasible path found, cannot move further :(";
+          return;
         }
       }
-      _ref2 = this.get_next_move(), nx = _ref2[0], ny = _ref2[1];
-      return this.move(nx, ny);
+      return this.continue_moving();
+    };
+
+    _Player.prototype.continue_moving = function() {
+      var nx, ny, _ref1;
+      if (this.current_path !== null) {
+        _ref1 = this.get_next_move(), nx = _ref1[0], ny = _ref1[1];
+        return this.move(nx, ny);
+      }
     };
 
     _Player.prototype.consume_object = function() {
-      var obj;
-      obj = this.seeable_objects.splice(0, 1)[0];
+      var ind, o, obj, _i, _len, _ref1;
+      obj = null;
+      _ref1 = this.seeable_objects;
+      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+        o = _ref1[_i];
+        if (o instanceof PowerUp) {
+          obj = o;
+          break;
+        }
+      }
+      ind = $.inArray(obj, this.seeable_objects);
+      if (ind !== -1) {
+        this.seeable_objects.splice(ind, 1);
+      }
+      if ($.inArray(obj.type, this.powerup_locations === -1)) {
+        this.powerup_locations.push({
+          type: obj.type,
+          x: obj.posx,
+          y: obj.posy
+        });
+      }
       obj.pre_consume(this);
       obj.consume(this);
-      obj.post_consume(this);
-      return this.move(obj.posx - this.posx, obj.posy - this.posy);
+      return obj.post_consume(this);
     };
 
     _Player.prototype.do_action = function() {
-      var err, i, node, _i, _ref1, _results;
+      var i, node, _i, _ref1, _results;
       this.process_bonuses();
       _results = [];
       for (i = _i = 1, _ref1 = this.speed; 1 <= _ref1 ? _i <= _ref1 : _i >= _ref1; i = 1 <= _ref1 ? ++_i : --_i) {
         node = this.decision.make_decision(this);
         if (node !== null) {
           this.current_action = node.action;
-          try {
-            _results.push(this[this.current_action]());
-          } catch (_error) {
-            err = _error;
-            _results.push(console.error(err));
-          }
+          _results.push(this[this.current_action]());
         } else {
-          _results.push(console.log("We have no action to take. Returned node is null"));
+          _results.push(console.log("Player", this.number, " We have no action to take. Returned node is null"));
         }
       }
       return _results;

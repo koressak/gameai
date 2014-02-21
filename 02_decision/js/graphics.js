@@ -25,16 +25,7 @@
         return p.text("GAME WON", centerx, centery);
       }
     };
-    return processing.keyPressed = function() {
-      if (p.keyCode === 32) {
-        running = !running;
-        if (running) {
-          return p.loop();
-        } else {
-          return p.noLoop();
-        }
-      }
-    };
+    return processing.keyPressed = function() {};
   };
 
 }).call(this);

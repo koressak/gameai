@@ -11,10 +11,13 @@
 @MAX_HEALTH = 100
 @CRITICAL_HEALTH = 25
 
+@MAX_PURSUE_LENGTH = 10
+
 
 @Player = class _Player extends @MovableGameObject
     init: ->
         @image = 'images/soldier.png'
+        # @image = 'images/got_damaged.png'
         @load_image()
 
         dbuilder = new DecisionBuilder
@@ -31,6 +34,9 @@
 
         # Save game map
         @map = g.get_map()
+
+        # Known powerup locations
+        @powerup_locations = new Array
 
         # Init personal explored tile arrays
         @explored_tiles = new Array(@map.width)
@@ -57,7 +63,8 @@
         @seeable_objects = new Array
         @active_bonuses = new Array
 
-        # @attack_target = null
+        @last_target = null
+        @pursue_length = 0
         @retreat_tile = null
 
     set_state: (state) ->
@@ -122,9 +129,11 @@
         @seeable_objects = new Array
         tiles = @map.get_adjacent_tiles @posx, @posy
         for i in [0..tiles.length-1]
-            o = tiles[i].get_object()
-            if o != null
-                @seeable_objects.push o
+            o = tiles[i].get_objects()
+            # console.log o, o.length
+            if o.length > 0
+                @seeable_objects = @seeable_objects.concat o
+                # console.log "seeable objects ", @seeable_objects
 
         # console.log "Seeable objects", @seeable_objects
         # console.log "Result", @seeable_objects.length
@@ -133,18 +142,25 @@
     is_object_consumable: ->
         # If the seeable object is consumable (powerup)
         # For starters - we pick just the first one we see
-        obj = @seeable_objects[0]
-        # console.log 'Is consumable'
-        # console.log obj
-        # console.log obj instanceof PowerUp
-        obj instanceof PowerUp
+        # console.log "Not consuming: ", @seeable_objects
+        for obj in @seeable_objects
+            if obj instanceof PowerUp
+                return true
+        # obj = @seeable_objects[0]
+        # console.log "First object ", obj
+        # console.log 'Is consumable', obj instanceof PowerUp
+        # obj instanceof PowerUp
+        false
 
     is_object_player: ->
-        obj = @seeable_objects[0]
+        for obj in @seeable_objects
+            if obj instanceof Player
+                return true
         # console.log 'Is Player'
         # console.log obj
         # console.log obj instanceof Player
-        obj instanceof Player
+        # obj instanceof Player
+        false
 
     # --- Attack and flee
     is_fighting: ->
@@ -152,29 +168,47 @@
 
     can_attack: ->
         # Player can attack if his health is above critical
-        if @health > CRITICAL_HEALTH
+        if (@health+@armor) > CRITICAL_HEALTH
             return true
         false
 
     is_health_good: ->
         # TODO: measure intensity of loosing healh in a fight
-        if @health > CRITICAL_HEALTH
+        if (@health+@armor) > CRITICAL_HEALTH
+            return true
+        false
+
+    need_healing: ->
+        # TODO: measure intensity of loosing healh in a fight
+        if @health <= CRITICAL_HEALTH
+            # console.log "Player needs healing"
             return true
         false
 
     attack: ->
         @state = PSTATE_ATTACK
 
-        obj = @seeable_objects[0]
+        target = null
+        # if @last_target
+        #     target = @last_target
+        # else
+        for obj in @seeable_objects
+            if obj instanceof Player
+                target = obj
+                break
+
+        @last_target = target
         # console.log @name + ": attacking"
         # console.log "Inflicting damage: " + @damage
-        obj.get_damaged @damage
+        target.get_damaged @damage
 
-        if obj.health <= 0
+        if target.health <= 0
             # increment score
             @score += 1
             # remove object from game
-            g.player_death obj
+            # obj.remove_animation()
+            g.player_death target
+            @last_target = null
 
             if @score == winning_score
                 g.player_won @
@@ -188,6 +222,34 @@
             @health -= res
         else
             @armor -= dmg
+
+        # add damaged animation
+        anim = new Animation 'images/got_damaged.png', 1
+        @add_animation anim
+
+    pursue: ->
+        # Pursue last target if it got out of sight
+        # TODO: very, very, very cheaty
+        # console.log "Pursuing...", @last_target
+        if @last_target != null
+            nx = @last_target.posx - @posx
+            ny = @last_target.posy - @posy
+            @move nx, ny
+
+            # If we exceed number of pursue tiles, we get back to search
+            # won't be chasing that idiot for ever ;)
+            @pursue_length += 1
+            if @pursue_length >= MAX_PURSUE_LENGTH
+                # console.log "Stopping pursue due to length"
+                @state = PSTATE_EXPLORE
+                @pursue_length = 0
+                @last_target = null
+
+        else
+            # console.log "Getting back to explore"
+            @state = PSTATE_EXPLORE
+            @pursue_length = 0
+            @last_target = null
 
     can_flee: ->
         # Get adjacent tiles and see, if there is a way to retreat
@@ -204,11 +266,35 @@
         false
 
     flee: ->
+        @clear_current_goal()
         @state = PSTATE_FLEE
         # console.log @name, "Fleeing"
         nx = @retreat_tile.posx - @posx
         ny = @retreat_tile.posy - @posy
         @move nx, ny
+
+    # -- Try to find and get the consumable object
+    find_health: ->
+        # TODO: when power up is not active, we will be still no one place
+        know = false
+        x = -1
+        y = -1
+        for loc in @powerup_locations
+            if loc.type == 'health'
+                know = true
+                x = loc.x
+                y = loc.y
+
+        if know
+            tile = @map.tiles[x][y]
+            @current_path = @find_path_to_target tile
+
+            if not @current_path
+                @search_player()
+            else
+                @continue_moving()
+        else
+            @search_player()
 
 
     # --- Explore nearby surroundings
@@ -236,23 +322,45 @@
             # console.log "New path", @current_path
 
             if not @current_path
-                throw "No feasible path found, cannot move further :("
+                return
+                # throw "No feasible path found, cannot move further :("
 
-        [nx, ny] = @get_next_move()
-        @move nx, ny
+        @continue_moving()
+
+    continue_moving: ->
+        if @current_path != null
+            [nx, ny] = @get_next_move()
+            @move nx, ny
 
 
     # --- Interact with nearby objects
     consume_object: ->
         # Consume nearby object (powerup in this case)
-        obj = @seeable_objects.splice(0,1)[0]
+        obj = null
+        for o in @seeable_objects
+            if o instanceof PowerUp
+                obj = o
+                break;
+        ind = $.inArray obj, @seeable_objects
+        if ind != -1
+            @seeable_objects.splice ind, 1
+        # obj = @seeable_objects.splice(0,1)[0]
+
+        # Check for known location of this object
+        if $.inArray obj.type, @powerup_locations == -1
+            # console.log "Adding ", obj.type, " to known locations!!"
+            @powerup_locations.push 
+                    type: obj.type
+                    x: obj.posx 
+                    y: obj.posy
+            # console.log @powerup_locations
 
         # consume it's power
         obj.pre_consume @
         obj.consume @
         obj.post_consume @
         # move to it's place
-        @move obj.posx-@posx, obj.posy-@posy
+        # @move obj.posx-@posx, obj.posy-@posy
 
 
     # --- Main loop for a player - make and execute decision
@@ -266,16 +374,16 @@
 
         for i in [1..@speed]
             node = @decision.make_decision @
-            # console.log 'Current decision node'
+            # console.log "Player", @number, 'Current decision node'
             # console.log node
             if node != null
                 @current_action = node.action
                 # TODO: enable the try/catch
-                try
-                    @[@current_action]()
-                catch err
-                    console.error err
+                # try
+                @[@current_action]()
+                # catch err
+                #     console.error err
             else
-                console.log "We have no action to take. Returned node is null"
+                console.log "Player", @number, " We have no action to take. Returned node is null"
 
 

@@ -13,7 +13,7 @@
       window.tile_no_y = 13;
       window.tile_width = 30;
       window.tile_height = 30;
-      window.rock_count = 50;
+      window.rock_count = 40;
       window.frame_step = 300;
       window.powerup_spawn_percent = 15;
       window.winning_score = 5;

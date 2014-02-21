@@ -14,7 +14,7 @@
       this.terrain = terrain;
       this.posx = x;
       this.posy = y;
-      this.object = null;
+      this.objects = new Array;
       this.explored = true;
       return this.unexplored_image = null;
     };
@@ -30,40 +30,43 @@
       return this.unexplored_image = pinst.loadImage('images/unexplored.png');
     };
 
-    _Class.prototype.set_object = function(obj) {
-      return this.object = obj;
+    _Class.prototype.add_object = function(obj) {
+      return this.objects.push(obj);
     };
 
-    _Class.prototype.get_object = function() {
-      return this.object;
+    _Class.prototype.get_objects = function() {
+      return this.objects;
     };
 
-    _Class.prototype.remove_object = function() {
-      var o;
-      o = this.object;
-      this.object = null;
-      return o;
+    _Class.prototype.remove_object = function(obj) {
+      var ind, o;
+      ind = $.inArray(obj, this.objects);
+      if (ind !== -1) {
+        o = this.objects.splice(ind, 1);
+        return o[0];
+      }
+      return null;
     };
 
     _Class.prototype.is_walkable = function() {
       if (!this.walkable) {
         return false;
       }
-      if (this.object !== null) {
-        if (this.object instanceof Player) {
-          return false;
-        }
+      if (this.objects.length > 0) {
+        return false;
       }
       return true;
     };
 
     _Class.prototype.draw = function() {
-      var x, y;
+      var o, x, y, _i, _len, _ref;
       x = this.posx * tile_width;
       y = this.posy * tile_height;
       window.pinst.image(this.image, x, y, tile_width, tile_height);
-      if (this.object !== null) {
-        this.object.draw();
+      _ref = this.objects;
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        o = _ref[_i];
+        o.draw();
       }
       if (!this.explored) {
         return window.pinst.image(this.unexplored_image, x, y, tile_width, tile_height);
@@ -100,16 +103,16 @@
     _Class.prototype.add_game_object = function(obj) {
       if ($.inArray(obj, this.game_objects === -1)) {
         this.game_objects.push(obj);
-        return this.tiles[obj.posx][obj.posy].set_object(obj);
+        return this.tiles[obj.posx][obj.posy].add_object(obj);
       }
     };
 
-    _Class.prototype.move_game_object = function(ox, oy, nx, ny) {
+    _Class.prototype.move_game_object = function(obj, ox, oy, nx, ny) {
       var o;
       this.set_tile_explored(nx, ny);
-      o = this.tiles[ox][oy].remove_object();
+      o = this.tiles[ox][oy].remove_object(obj);
       if (o !== null) {
-        return this.tiles[nx][ny].set_object(o);
+        return this.tiles[nx][ny].add_object(o);
       }
     };
 
@@ -118,7 +121,7 @@
       ind = $.inArray(obj, this.game_objects);
       if (ind !== -1) {
         o = this.game_objects[ind];
-        this.tiles[o.posx][o.posy].remove_object();
+        this.tiles[o.posx][o.posy].remove_object(obj);
         return this.game_objects.splice(ind, 1);
       }
     };
@@ -142,17 +145,17 @@
       if (y < 0 || y > this.height - 1) {
         return false;
       }
-      return this.tiles[x][y].get_object() === null;
+      return this.tiles[x][y].get_objects().length === 0;
     };
 
-    _Class.prototype.get_tile_object = function(x, y) {
+    _Class.prototype.get_tile_objects = function(x, y) {
       if (x < 0 || x > this.width - 1) {
         return null;
       }
       if (y < 0 || y > this.height - 1) {
         return null;
       }
-      return this.tiles[x][y].get_object();
+      return this.tiles[x][y].get_objects();
     };
 
     _Class.prototype.set_tile_explored = function(x, y) {

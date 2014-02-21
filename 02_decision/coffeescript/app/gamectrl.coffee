@@ -12,7 +12,7 @@ controllers.controller 'GameCtrl', ['$scope', '$rootScope', '$location', '$ancho
     window.tile_no_y = 13
     window.tile_width = 30
     window.tile_height = 30
-    window.rock_count = 50
+    window.rock_count = 40
     window.frame_step = 300 # 300 ms as a step
 
     window.powerup_spawn_percent = 15
