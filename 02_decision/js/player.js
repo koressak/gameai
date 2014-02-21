@@ -160,14 +160,14 @@
     };
 
     _Player.prototype.can_attack = function() {
-      if (this.health > CRITICAL_HEALTH) {
+      if ((this.health + this.armor) > CRITICAL_HEALTH) {
         return true;
       }
       return false;
     };
 
     _Player.prototype.is_health_good = function() {
-      if (this.health > CRITICAL_HEALTH) {
+      if ((this.health + this.armor) > CRITICAL_HEALTH) {
         return true;
       }
       return false;
@@ -188,14 +188,16 @@
     };
 
     _Player.prototype.get_damaged = function(dmg) {
-      var res;
+      var anim, res;
       if (dmg > this.armor) {
         res = Math.abs(this.armor - dmg);
         this.armor = 0;
-        return this.health -= res;
+        this.health -= res;
       } else {
-        return this.armor -= dmg;
+        this.armor -= dmg;
       }
+      anim = new Animation('images/got_damaged.png', 1);
+      return this.add_animation(anim);
     };
 
     _Player.prototype.can_flee = function() {

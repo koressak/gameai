@@ -26,12 +26,12 @@
         # player = g.get_player(0)
 
         # console.log p.keyCode
-        if p.keyCode == 32
-            running = !running
-            if running
-                p.loop()
-            else
-                p.noLoop()
+        # if p.keyCode == 32
+        #     running = !running
+        #     if running
+        #         p.loop()
+        #     else
+        #         p.noLoop()
 
         # if p.key.code == p.CODED
         #     if p.keyCode == p.UP

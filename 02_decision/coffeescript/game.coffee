@@ -38,6 +38,12 @@
         delta = now - @last_move_time
         # Player movement
         if delta > frame_step
+
+            # Let everyone know a frame passed
+            # TODO: do it via broadcast an event system
+            for o in @map.game_objects
+                o.frame()
+
             @last_move_time = now
             for i in [0..@players.length-1]
                 p = @players[i] 
@@ -52,6 +58,8 @@
             if ind <= powerup_spawn_percent
                 @spawn_powerup()
             @scope.update_ui()
+
+
 
 
     spawn_new_player: () ->

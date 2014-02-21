@@ -34,15 +34,20 @@
     };
 
     _Class.prototype.game_loop = function() {
-      var delta, i, ind, now, p, _i, _ref;
+      var delta, i, ind, now, o, p, _i, _j, _len, _ref, _ref1;
       if (this.game_finished) {
         return true;
       }
       now = new Date;
       delta = now - this.last_move_time;
       if (delta > frame_step) {
+        _ref = this.map.game_objects;
+        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+          o = _ref[_i];
+          o.frame();
+        }
         this.last_move_time = now;
-        for (i = _i = 0, _ref = this.players.length - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (i = _j = 0, _ref1 = this.players.length - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; i = 0 <= _ref1 ? ++_j : --_j) {
           p = this.players[i];
           if (p.state !== PSTATE_DEATH) {
             p.do_action();

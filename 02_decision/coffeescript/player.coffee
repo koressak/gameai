@@ -15,6 +15,7 @@
 @Player = class _Player extends @MovableGameObject
     init: ->
         @image = 'images/soldier.png'
+        # @image = 'images/got_damaged.png'
         @load_image()
 
         dbuilder = new DecisionBuilder
@@ -152,13 +153,13 @@
 
     can_attack: ->
         # Player can attack if his health is above critical
-        if @health > CRITICAL_HEALTH
+        if (@health+@armor) > CRITICAL_HEALTH
             return true
         false
 
     is_health_good: ->
         # TODO: measure intensity of loosing healh in a fight
-        if @health > CRITICAL_HEALTH
+        if (@health+@armor) > CRITICAL_HEALTH
             return true
         false
 
@@ -188,6 +189,10 @@
             @health -= res
         else
             @armor -= dmg
+
+        # add damaged animation
+        anim = new Animation 'images/got_damaged.png', 1
+        @add_animation anim
 
     can_flee: ->
         # Get adjacent tiles and see, if there is a way to retreat
