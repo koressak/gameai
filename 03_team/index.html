@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>AI - Decision making</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Bootstrap -->
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/game.css" rel="stylesheet">
+    </head>
+    <body>
+        <div class="container">
+            <div ng-view></div>
+        </div>
+
+        <script type="text/javascript" src="lib/jquery-2.0.3.min.js"></script>
+        <script type="text/javascript" src="lib/angular.min.js"></script>
+        <script type="text/javascript" src="lib/angular-route.min.js"></script>
+        <script type="text/javascript" src="lib/underscore-min.js"></script>
+        <script type="text/javascript" src="lib/processing-1.4.1.js"></script>
+
+        <script type="text/javascript" src="js/decisiontree.js"></script>
+        <script type="text/javascript" src="js/gameobject.js"></script>
+        <script type="text/javascript" src="js/powerups.js"></script>
+        <script type="text/javascript" src="js/pathfind.js"></script>
+        <script type="text/javascript" src="js/map.js"></script>
+        <script type="text/javascript" src="js/player.js"></script>
+        <script type="text/javascript" src="js/game.js"></script>
+        <script type="text/javascript" src="js/graphics.js"></script>
+        <script type="text/javascript" src="js/init.js"></script>
+
+        <!-- Angular stuff -->
+        <script type="text/javascript" src="js/app/ngapp.js"></script>
+        <script type="text/javascript" src="js/app/gamectrl.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                window.init_app();
+            })
+        </script>
+        <script type="text/javascript" src="js/analytics.js"></script>
+    </body>
+</html>

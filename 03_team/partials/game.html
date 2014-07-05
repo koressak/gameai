@@ -1,0 +1,116 @@
+<div class="row">
+    <div class="col-md-12">
+        <h1>Decision trees - Deathmatch game</h1>
+        <p>
+            Deathmatch between several AIs, power ups added to spice the game...
+            <a class="label label-primary" ng-click="scroll_to('description')">Read more</a>
+        </p>
+
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-7">
+        <canvas id="gamecanvas" width="640" height="480"></canvas>
+        <div class="panel panel-warning">
+            <div class="panel-heading"><strong>Game Log</strong></div>
+            <div class="panel-body">
+                <ul class="game-log">
+                    <li ng-repeat="item in game_log">
+                        <span class="label label-{{item.status}}">&nbsp;</span>
+                        {{item.text}}
+                    </li>
+                </ul>
+            </div>
+        </div> <!-- panel -->
+    </div>
+    <div class="col-md-5">
+        <h3>Game controls</h3>
+        <button class="btn btn-success" ng-click="toggle_game()" ng-show="!is_game_running">Start game</button>
+        <button class="btn btn-warning" ng-click="toggle_game()" ng-show="is_game_running">Stop game</button>
+        <br>
+        <br>
+        <br>
+        <div class="row">
+            <div class="col-md-12">
+                <p>Winning score: {{winning_score}}</p>
+                <div ng-repeat="player in players" class="panel panel-default player-stats">
+                    <div class="panel-heading">{{player.name}}</div>
+                    <div class="panel-body">
+                        <p>
+                            Health: <span class="badge">{{player.health}}</span><br>
+                            Armor: <span class="badge">{{player.armor}}</span><br>
+                            Speed: <span class="badge">{{player.speed}}</span><br>
+                            Damage: <span class="badge">{{player.damage}}</span><br>
+                            Score: <span class="badge">{{player.score}}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+            </div>
+        </div> <!-- row -->
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-8">
+    </div>
+</div>
+<h2>Decision trees - simulating real behavior</h2>
+<div class="row" id="description">
+    <div class="col-md-6">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Game goal</strong>
+            </div>
+            <div class="panel-body">
+                <p>
+                    The main goal is to eliminate the enemy and reach the winning score - number of kills.<br>
+                    Players have one objective - search and destroy. While exploring the map, they find the powerups (description below) which will boost their stats and help them get the enemy faster and easier.
+                </p>
+
+                <p>Each player is able to fight with the enemy with his fists, inflicting damage
+                    (<strong>5 health points</strong>). The attack is possible while standing on the tile next to the enemy.
+                </p>
+                <p>When the player health drops below critical threshold, he flees if he is able to. If not, attacks as a last resort of defence.
+                </p>
+            </div>
+        </div>
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Bonuses</strong>
+            </div>
+            <div class="panel-body">
+                <p>Bonuses help the player in these ways:</p>
+                <ul>
+                    <li><strong>Health bonus</strong> - instant +20 of players health.</li>
+                    <li>
+                        <strong>Speed bonus</strong> - +1 action per frame step, 10 frame steps timeout.
+                    </li>
+                    <li>
+                        <strong>Damage bonus</strong> - +2 damage points, permanent (till death).
+                    </li>
+                    <li>
+                        <strong>Armor bonus</strong> - +5 armor points.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <strong>Coding challenge</strong>
+            </div>
+            <div class="panel-body">
+                <p>
+                    Main goal is to implement the <strong>Decision tree</strong> to simulate behavior of the game player. 
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
