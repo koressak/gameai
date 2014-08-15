@@ -10,7 +10,7 @@
 
     processing.draw = () ->
         if not g.game_finished
-            g.game_loop()
+#            g.game_loop()
             map = g.get_map()
             map.draw()
         else

@@ -180,6 +180,20 @@
       return tiles;
     };
 
+    _Class.prototype.count_tile_walls = function(x, y) {
+      var count, t, tiles, _i, _len;
+      tiles = this.get_adjacent_tiles(x, y);
+      count = 0;
+      for (_i = 0, _len = tiles.length; _i < _len; _i++) {
+        t = tiles[_i];
+        if (!t.walkable) {
+          count += 1;
+        }
+      }
+      console.log(count);
+      return count;
+    };
+
     _Class.prototype.draw = function() {
       var x, y, _i, _ref, _results;
       _results = [];
@@ -206,23 +220,53 @@
     }
 
     _Class.prototype.render = function(w, h) {
-      var map, posx, posy, rock_no, t, x, y, _i, _j, _k, _l, _m, _ref, _ref1, _ref2, _ref3;
+      var adj, here, map, neighbors, next, nodes, path, t, unvisited, walls, x, y, _i, _j, _k, _l, _len, _m, _ref, _ref1, _ref2, _ref3;
       map = new window.Map;
       map.init(w, h);
+      nodes = w * h;
+      here = [Math.floor(Math.random() * w), Math.floor(Math.random() * h)];
+      path = [here];
+      unvisited = Array(w);
       for (x = _i = 0, _ref = w - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; x = 0 <= _ref ? ++_i : --_i) {
+        unvisited[x] = Array(h);
         for (y = _j = 0, _ref1 = h - 1; 0 <= _ref1 ? _j <= _ref1 : _j >= _ref1; y = 0 <= _ref1 ? ++_j : --_j) {
+          unvisited[x][y] = true;
           t = new window.MapTile;
-          t.init(true, TERRAIN_GRASS, x, y);
+          if (x === here[0] && y === here[1]) {
+            t.init(true, TERRAIN_GRASS, x, y);
+          } else {
+            t.init(false, TERRAIN_ROCK, x, y);
+          }
           map.add_tile(x, y, t);
         }
       }
-      rock_no = window.rock_count;
-      for (x = _k = 1; 1 <= rock_no ? _k <= rock_no : _k >= rock_no; x = 1 <= rock_no ? ++_k : --_k) {
-        posx = get_random_int(0, w - 1);
-        posy = get_random_int(0, h - 1);
-        t = map.tiles[posx][posy];
-        t.walkable = false;
-        t.terrain = TERRAIN_ROCK;
+      unvisited[here[0]][here[1]] = false;
+      while (0 < nodes) {
+        if (typeof here === "undefined") {
+          break;
+        }
+        neighbors = [];
+        adj = map.get_adjacent_tiles(here[0], here[1]);
+        for (_k = 0, _len = adj.length; _k < _len; _k++) {
+          t = adj[_k];
+          if (unvisited[t.posx][t.posy]) {
+            neighbors.push(t);
+          }
+        }
+        if (neighbors.length) {
+          nodes -= 1;
+          next = neighbors[Math.floor(Math.random() * neighbors.length)];
+          unvisited[next.posx][next.posy] = false;
+          walls = map.count_tile_walls(next.posx, next.posy);
+          if (walls > 1) {
+            next.walkable = true;
+            next.terrain = TERRAIN_GRASS;
+          }
+          path.push(here);
+          here = [next.posx, next.posy];
+        } else {
+          here = path.pop();
+        }
       }
       for (x = _l = 0, _ref2 = w - 1; 0 <= _ref2 ? _l <= _ref2 : _l >= _ref2; x = 0 <= _ref2 ? ++_l : --_l) {
         for (y = _m = 0, _ref3 = h - 1; 0 <= _ref3 ? _m <= _ref3 : _m >= _ref3; y = 0 <= _ref3 ? ++_m : --_m) {

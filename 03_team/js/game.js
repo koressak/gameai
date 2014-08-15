@@ -6,18 +6,13 @@
     }
 
     _Class.prototype.init_game = function(scope) {
-      var i, _i, _ref;
       this.game_finished = false;
       this.mrender = new window.MapRenderer;
       this.map = this.mrender.render(tile_no_x, tile_no_y);
       this.scope = scope;
       this.player_counter = 0;
       this.last_move_time = new Date;
-      this.players = new Array;
-      for (i = _i = 0, _ref = max_players - 1; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-        this.spawn_new_player();
-      }
-      return this.init_powerup_spawners();
+      return this.players = new Array;
     };
 
     _Class.prototype.get_player = function(x) {

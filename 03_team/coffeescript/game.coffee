@@ -15,11 +15,11 @@
         @last_move_time = new Date
         @players = new Array
 
-        for i in [0..max_players-1]
-            @spawn_new_player()
+#        for i in [0..max_players-1]
+#            @spawn_new_player()
 
         # Spawn powerups
-        @init_powerup_spawners()
+#        @init_powerup_spawners()
 
     get_player: (x) ->
         if x < @players.length

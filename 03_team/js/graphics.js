@@ -13,7 +13,6 @@
     processing.draw = function() {
       var centerx, centery, map;
       if (!g.game_finished) {
-        g.game_loop();
         map = g.get_map();
         return map.draw();
       } else {
